@@ -6,7 +6,10 @@ using GridSoccer.Common;
 
 namespace GridSoccer.Simulator
 {
-    public class PendingActionsInfo
+    /// <summary>
+    /// Encapsulates information about pending actions
+    /// </summary>
+    internal class PendingActionsInfo
     {
         public bool Updated;
         public Position NewPos;

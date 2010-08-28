@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,139 +12,213 @@ namespace GridSoccer.Simulator
 {
     public partial class FormMain : Form
     {
-        SimulationController simController = new SimulationController();
+        private SimulationController m_simController = new SimulationController();
+        private bool m_isMonitorBinded = false;
 
         public FormMain()
         {
             InitializeComponent();
 
-            simController.GameCyclesFinished += new EventHandler(simController_GameCyclesFinished);
-            propController.SelectedObject = simController;
-            simController.BindMonitor(soccerMonitor1);
+            // Init Image Icons
+            tbtnBindMonitor.Visible = false;
+            tbtnNormalSpeed.Visible = false;
+            tbtnPause.Visible = false;
+
+            // make some buttons disabled
+            tbtnStep.Enabled = false;
+            tbtnStop.Enabled = false;
+
+            m_simController.GameCyclesFinished += new EventHandler(simController_GameCyclesFinished);
+            propController.SelectedObject = m_simController;
+            m_simController.BindMonitor(soccerMonitor);
+            m_isMonitorBinded = true;
         }
 
         void simController_GameCyclesFinished(object sender, EventArgs e)
         {
-            btnPause.Enabled = false;
-            btnStep.Enabled = false;
-            btnStart.Enabled = false;
-            btnStop.Enabled = false;
-            btnGoJet.Enabled = false;
-        }
-
-        private void btnStart_Click(object sender, EventArgs e)
-        {
-            btnStart.Enabled = false;
-            simController.Start();
-            btnStop.Enabled = true;
-            btnPause.Enabled = true;
-            btnStep.Enabled = true;
+            tbtnStep.Enabled = false;
+            tbtnStartResume.Enabled = false;
+            tbtnStop.Enabled = false;
+            tbtnTurbo.Enabled = false;
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!simController.IsGameStopped)
+            if (!m_simController.IsGameStopped)
             {
-                bool wasPaused = simController.IsPaused;
+                bool wasPaused = m_simController.IsPaused;
                 if (!wasPaused)
-                    simController.TogglePauseResume();
+                    m_simController.TogglePauseResume();
 
                 if (DialogResult.Yes == MessageBox.Show("Are you sure you want to stop the game and exit?", "Exit?", MessageBoxButtons.YesNo))
                 {
-                    simController.Finish();
+                    m_simController.Stop();
                 }
                 else
                 {
                     e.Cancel = true;
                     if (!wasPaused)
-                        simController.TogglePauseResume();
+                        m_simController.TogglePauseResume();
                 }
             }
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+
+        private void ToggleBindUnbindButtonUI(bool toBind)
         {
-            bool wasPaused = simController.IsPaused;
-            if(!wasPaused)
-                simController.TogglePauseResume();
+            tbtnBindMonitor.Visible = toBind;
+            tbtnUnbindMonitor.Visible = !toBind;
+        }
+
+        private void ToggleTurboNormalButtonUI(bool toTurbo)
+        {
+            tbtnTurbo.Visible = toTurbo;
+            tbtnNormalSpeed.Visible = !toTurbo;
+        }
+
+        private void ToggleStartPauseButtonUI(bool toPause)
+        {
+            tbtnPause.Visible = toPause;
+            tbtnStartResume.Visible = !toPause;
+        }
+
+        #region Actions
+
+        private void StartResumeAction()
+        {
+            if (!m_simController.IsGameStarted) 
+            {
+                tbtnStop.Enabled = true;
+                tbtnStep.Enabled = true;
+                m_simController.Start();
+            }
+            else if(m_simController.IsPaused)
+            {
+                m_simController.TogglePauseResume();
+            }
+                
+            ToggleStartPauseButtonUI(true);
+        }
+
+        private void PauseAction()
+        {
+            if(!m_simController.IsPaused)
+            {
+                m_simController.TogglePauseResume();
+                ToggleStartPauseButtonUI(false);
+            }
+        }
+
+        private void StopAction()
+        {
+            bool wasPaused = m_simController.IsPaused;
+            if (!wasPaused)
+                m_simController.TogglePauseResume();
 
             if (DialogResult.Yes == MessageBox.Show("Are you sure you want to stop the game?", "Stop the game?", MessageBoxButtons.YesNo))
             {
-                simController.Finish();
-                btnPause.Enabled = false;
-                btnStep.Enabled = false;
-                btnStart.Enabled = false;
-                btnStop.Enabled = false;
-                btnGoJet.Enabled = false;
+                m_simController.Stop();
+                tbtnStep.Enabled = false;
+                tbtnStartResume.Enabled = false;
+                tbtnStop.Enabled = false;
+                tbtnTurbo.Enabled = false;
             }
             else
             {
                 if (!wasPaused)
-                    simController.TogglePauseResume();
+                    m_simController.TogglePauseResume();
             }
         }
 
-        private void btnPause_Click(object sender, EventArgs e)
+        private void StepAction()
         {
-            simController.TogglePauseResume();
-            SetPauseButtonCaption();
+            m_simController.RunOneStep();
+            ToggleStartPauseButtonUI(false);
         }
 
-        private void btnStep_Click(object sender, EventArgs e)
+        private void BindUnbindMonitorAction()
         {
-            simController.RunOneStep();
-            SetPauseButtonCaption();
-        }
-
-        private void SetPauseButtonCaption()
-        {
-            if (simController.IsPaused)
-                btnPause.Text = "Resume";
-            else
-                btnPause.Text = "Pause";
-        }
-
-        private void btnBindMonitor_Click(object sender, EventArgs e)
-        {
-            simController.BindMonitor(soccerMonitor1);
-            btnUnbindMonitor.Enabled = true;
-            btnBindMonitor.Enabled = false;
-        }
-
-        private void btnUnbindMonitor_Click(object sender, EventArgs e)
-        {
-            simController.UnbindMonitor(soccerMonitor1);
-            btnUnbindMonitor.Enabled = false;
-            btnBindMonitor.Enabled = true;
-        }
-
-        private void btnGoJet_Click(object sender, EventArgs e)
-        {
-            if (simController.JetMode)
+            if (m_isMonitorBinded)
             {
-                simController.JetMode = false;
-                if (!simController.JetMode)
+                m_simController.UnbindMonitor(soccerMonitor);
+                ToggleBindUnbindButtonUI(true);
+                m_isMonitorBinded = false;
+            }
+            else
+            {
+                m_simController.BindMonitor(soccerMonitor);
+                ToggleBindUnbindButtonUI(false);
+                m_isMonitorBinded = true;
+            }
+        }
+
+        private void TurboToggleAction()
+        {
+            if (m_simController.TurboMode)
+            {
+                m_simController.TurboMode = false;
+                if (!m_simController.TurboMode)
                 {
-                    btnGoJet.BackColor = Color.Red;
-                    btnGoJet.Text = "Go Jet";
-                    btnStep.Enabled = true;
-                    btnPause.Enabled = true;
+                    ToggleTurboNormalButtonUI(true);
                 }
             }
             else
             {
-                if (simController.IsGameStarted)
+                if (m_simController.IsGameStarted)
                 {
-                    btnGoJet.BackColor = Color.Cyan;
-                    btnGoJet.Text = "Go Normal";
-                    btnStep.Enabled = false;
-                    btnPause.Enabled = false;
+                    ToggleTurboNormalButtonUI(false);
 
                     Application.DoEvents();
 
-                    simController.JetMode = true;
+                    m_simController.TurboMode = true;
                 }
             }
         }
+
+        #endregion
+
+        #region ToolBarButtons Events
+        private void tbtnStartResume_Click(object sender, EventArgs e)
+        {
+            StartResumeAction();
+        }
+
+        private void tbtnStep_Click(object sender, EventArgs e)
+        {
+            StepAction();
+        }
+
+        private void tbtnStop_Click(object sender, EventArgs e)
+        {
+            StopAction();
+        }
+
+
+        private void tbtnPause_Click(object sender, EventArgs e)
+        {
+            PauseAction();
+        }
+
+        private void tbtnTurbo_Click(object sender, EventArgs e)
+        {
+            TurboToggleAction();
+        }
+
+        private void tbtnNormalSpeed_Click(object sender, EventArgs e)
+        {
+            TurboToggleAction();
+        }
+
+        private void tbtnBindMonitor_Click(object sender, EventArgs e)
+        {
+            BindUnbindMonitorAction();
+        }
+
+        private void tbtnUnbindMonitor_Click(object sender, EventArgs e)
+        {
+            BindUnbindMonitorAction();
+        }
+        #endregion
+
     }
 }

@@ -48,7 +48,6 @@ namespace GridSoccer.Simulator.Net
             TcpClient client = listener.AcceptTcpClient();
             client.NoDelay = true;
 
-
             tempClients.Add(new ClientInfo() { PlayerIndex = -1, TcpClient = client });
         }
 
@@ -91,7 +90,7 @@ namespace GridSoccer.Simulator.Net
                     if (tempClients[i].DataAvailable)
                     {
                         string str = tempClients[i].ReadString();
-                        IMessageInfo mi = MessageParser.ProcessInputMessage(str);
+                        IMessageInfo mi = MessageParser.ParseInputMessage(str);
                         if (mi.MessageType == MessageTypes.Init)
                         {
                             InitMessage initmsg = mi as InitMessage;
@@ -144,7 +143,7 @@ namespace GridSoccer.Simulator.Net
                             recv[i] = true;
 
                             string str = ConnectedClients[i].ReadString();
-                            IMessageInfo mi = MessageParser.ProcessInputMessage(str);
+                            IMessageInfo mi = MessageParser.ParseInputMessage(str);
                             if (mi.MessageType == MessageTypes.Hold)
                             {
                                 SoccerAction act = new SoccerAction(ActionTypes.Hold, -1);
@@ -191,7 +190,7 @@ namespace GridSoccer.Simulator.Net
                     if (ConnectedClients[i].DataAvailable)
                     {
                         string str = ConnectedClients[i].ReadString();
-                        IMessageInfo mi = MessageParser.ProcessInputMessage(str);
+                        IMessageInfo mi = MessageParser.ParseInputMessage(str);
                         if (mi.MessageType == MessageTypes.Hold)
                         {
                             SoccerAction act = new SoccerAction(ActionTypes.Hold, -1);
@@ -232,7 +231,7 @@ namespace GridSoccer.Simulator.Net
             int count = simulator.LeftPlayersCount + simulator.RightPlayersCount;
 
             List<int> visiblePlayers;
-            ObjectInfo curPlayer;
+            PlayerInfo curPlayer;
 
             for (int i = 0; i < count; ++i)
             {
@@ -250,11 +249,11 @@ namespace GridSoccer.Simulator.Net
                     {
                         if (p < 0)
                         {
-                            sb.AppendFormat(" (b {0})", simulator.Ball.Position.ToString());
+                            sb.AppendFormat(" (b {0})", simulator.BallPosition.ToString());
                         }
                         else
                         {
-                            ObjectInfo thePlayer = simulator.Players[p];
+                            PlayerInfo thePlayer = simulator.Players[p];
                             sb.AppendFormat(" ({0} {1} {2})", 
                                 thePlayer.Side == Sides.Left ? "l" : "r", 
                                 thePlayer.PlayerNumber, 
@@ -270,11 +269,11 @@ namespace GridSoccer.Simulator.Net
                     {
                         if (p < 0)
                         {
-                            sb.AppendFormat(" (b {0})", simulator.Ball.Position.GetRTL().ToString());
+                            sb.AppendFormat(" (b {0})", simulator.BallPosition.GetRTL().ToString());
                         }
                         else
                         {
-                            ObjectInfo thePlayer = simulator.Players[p];
+                            PlayerInfo thePlayer = simulator.Players[p];
                             sb.AppendFormat(" ({0} {1} {2})",
                                 thePlayer.Side == Sides.Left ? "l" : "r",
                                 thePlayer.PlayerNumber,
@@ -287,8 +286,6 @@ namespace GridSoccer.Simulator.Net
 
                 ConnectedClients[i].WriteString(sb.ToString());
             }
-
-
         }
 
         #endregion

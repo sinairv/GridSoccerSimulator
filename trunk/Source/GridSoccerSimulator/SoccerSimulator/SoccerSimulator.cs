@@ -7,39 +7,113 @@ using GridSoccer.Common;
 
 namespace GridSoccer.Simulator
 {
+    /// <summary>
+    /// The Grid-Soccer Simulator class
+    /// </summary>
     public class SoccerSimulator
     {
         #region Fields
+
+        /// <summary>
+        /// Gets or sets the current cycle (i.e., time step) of the game
+        /// </summary>
+        /// <value>the current cycle (i.e., time step) of the game.</value>
         public long Cycle { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the score of the left team.
+        /// </summary>
+        /// <value>The score of the left team.</value>
         public int LeftScore { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the score of the right team.
+        /// </summary>
+        /// <value>The score of the right team.</value>
         public int RightScore { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the game has been started.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the game has been started; otherwise, <c>false</c>.
+        /// </value>
         public bool IsGameStarted { get; private set; }
 
-
+        /// <summary>
+        /// Gets or sets the name of the left team.
+        /// </summary>
+        /// <value>The name of the left team.</value>
         public string LeftTeamName { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the name of the right team.
+        /// </summary>
+        /// <value>The name of the right team.</value>
         public string RightTeamName { get; private set; }
 
-        public ObjectInfo[] Players { get; private set; }
-        public ObjectInfo Ball { get; private set; }
+        /// <summary>
+        /// Gets or sets the information related to all availbale players in the field.
+        /// </summary>
+        public PlayerInfo[] Players { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the position of the ball.
+        /// </summary>
+        /// <value>The position of the ball.</value>
+        public Position BallPosition { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the number of players of the left team.
+        /// </summary>
+        /// <value>The number of players of the left team.</value>
         public int LeftPlayersCount { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the number of players of the right team.
+        /// </summary>
+        /// <value>The number of players of the right team.</value>
         public int RightPlayersCount { get; private set; }
 
+        /// <summary>
+        /// An instance of random generator
+        /// </summary>
         private Random randomGenerator = null;
 
+        /// <summary>
+        /// The unum of the left player which will hold the ball upon game start
+        /// </summary>
         private int defaultLeftPlayer = -1;
+
+        /// <summary>
+        /// The unum of the right player which will hold the ball upon game start
+        /// </summary>
         private int defaultRightPlayer = -1;
+
+        /// <summary>
+        /// The distance into which the players can see objects, if set to zero, 
+        /// the players can see all the field
+        /// </summary>
         private int m_visibleDistance;
+
+        /// <summary>
+        /// The distance into which the players can pass, if set to zero,
+        /// the players can pass to any other teammate in any position of the field.
+        /// </summary>
         private int m_passableDistance;
 
         #endregion
 
         #region Ctor
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SoccerSimulator"/> class.
+        /// </summary>
+        /// <param name="randomSeed">The random seed.</param>
         public SoccerSimulator(int randomSeed)
         {
-            Players = new ObjectInfo[Settings.Default.MaxPlayers * 2];
-            Ball = new ObjectInfo();
+            Players = new PlayerInfo[Settings.Default.MaxPlayers * 2];
+            BallPosition = new Position(0, 0);
             Cycle = 0;
             LeftScore = 0;
             RightScore = 0;
@@ -60,16 +134,28 @@ namespace GridSoccer.Simulator
 
         #region Events
 
+        /// <summary>
+        /// Occurs when the state of the game changes (including every cycle completion).
+        /// </summary>
         public event EventHandler Changed;
 
+        /// <summary>
+        /// Raises the Changed event.
+        /// </summary>
         private void RaiseChangedEvent()
         {
             if (Changed != null)
                 Changed(this, new EventArgs());
         }
 
+        /// <summary>
+        /// Occurs when the score of the eaither teams has changed.
+        /// </summary>
         public event EventHandler ScoreChanged;
 
+        /// <summary>
+        /// Raises the score-changed event.
+        /// </summary>
         private void RaiseScoreChangedEvent()
         {
             if (ScoreChanged != null)
@@ -78,6 +164,13 @@ namespace GridSoccer.Simulator
 
         #endregion
 
+        /// <summary>
+        /// Adds a player to the game, with the specified uniform number, belonging
+        /// to the team with the specified name.
+        /// </summary>
+        /// <param name="teamName">Name of the team.</param>
+        /// <param name="unum">The uniform number.</param>
+        /// <returns></returns>
         public int AddPlayer(string teamName, int unum)
         {
             if (IsGameStarted)
@@ -119,7 +212,7 @@ namespace GridSoccer.Simulator
             }
 
             Players[LeftPlayersCount + RightPlayersCount] =
-                new ObjectInfo(SoccerObjects.Player, unum, side, homePos.Row, homePos.Col, homePos.Row, homePos.Col);
+                new PlayerInfo(unum, side, homePos.Row, homePos.Col, homePos.Row, homePos.Col);
             if (side == Sides.Left)
             {
                 LeftTeamName = teamName;
@@ -134,32 +227,46 @@ namespace GridSoccer.Simulator
             ChooseDefaultPlayers();
 
             if(defaultLeftPlayer >= 0)
-                Ball.Position.Set(Players[defaultLeftPlayer].HomePosition);
+                BallPosition.Set(Players[defaultLeftPlayer].HomePosition);
             else if(defaultRightPlayer >= 0)
-                Ball.Position.Set(Players[defaultRightPlayer].HomePosition);
+                BallPosition.Set(Players[defaultRightPlayer].HomePosition);
 
             RaiseChangedEvent();
             return LeftPlayersCount + RightPlayersCount - 1;
         }
 
+        /// <summary>
+        /// Sets the home position for the player with the specified player index.
+        /// </summary>
+        /// <param name="pi">The player index.</param>
+        /// <param name="r">The row.</param>
+        /// <param name="c">The column.</param>
+        /// <returns></returns>
         public bool SetHomePos(int pi, int r, int c)
         {
+            // You cannot set a player's home position during play-on
             if (IsGameStarted)
                 return false;
 
+            // Change it to right-to-left coordination if the player 
+            // is playing for the right-hand-side team
             Position newHomePosition = new Position(r, c);
             if (Players[pi].Side == Sides.Right)
                 newHomePosition = newHomePosition.GetRTL();
 
+            // see if there's another player already at the specified home-position
             int otherPi = FindPlayerWithHomePos(newHomePosition);
             if(otherPi < 0)
             {
+                // if there isn't such player then set the newly 
+                // added player's home position successfully
                 Players[pi].HomePosition.Set(newHomePosition);
                 Players[pi].Position.Set(newHomePosition);
                 Players[pi].HasHomePos = true;
             }
             else
             {
+                // if there's another player with the same home position
                 if (otherPi != pi)
                 {
                     if (Players[otherPi].HasHomePos)
@@ -175,17 +282,25 @@ namespace GridSoccer.Simulator
                 }
             }
 
+
             ChooseDefaultPlayers();
 
+            // Give the ownership of the ball to the default player
             if (defaultLeftPlayer >= 0)
-                Ball.Position.Set(Players[defaultLeftPlayer].HomePosition);
+                BallPosition.Set(Players[defaultLeftPlayer].HomePosition);
             else if (defaultRightPlayer >= 0)
-                Ball.Position.Set(Players[defaultRightPlayer].HomePosition);
+                BallPosition.Set(Players[defaultRightPlayer].HomePosition);
 
             RaiseChangedEvent();
             return true;
         }
 
+        /// <summary>
+        /// Finds the player with the given home posisiton 
+        /// and returns the corresponding player index.
+        /// </summary>
+        /// <param name="pos">The position to look for.</param>
+        /// <returns></returns>
         private int FindPlayerWithHomePos(Position pos)
         {
             for (int i = 0; i < LeftPlayersCount + RightPlayersCount; ++i)
@@ -196,6 +311,13 @@ namespace GridSoccer.Simulator
             return -1;
         }
 
+
+        /// <summary>
+        /// Chooses the default players from each team based upon their 
+        /// distance from the center of the field.
+        /// Default players are players that will own the ball when their team 
+        /// is going to start the game.
+        /// </summary>
         private void ChooseDefaultPlayers()
         {
             Position center = new Position(Settings.Default.NumRows / 2, Settings.Default.NumCols / 2);
@@ -226,6 +348,9 @@ namespace GridSoccer.Simulator
             }
         }
 
+        /// <summary>
+        /// Begins the simulation.
+        /// </summary>
         public void BeginSimulation()
         {
             m_pendingActions = new PendingActionsInfo[LeftPlayersCount + RightPlayersCount];
@@ -282,7 +407,7 @@ namespace GridSoccer.Simulator
         private bool CanSeeBall(int i)
         {
             Position pos1 = Players[i].Position;
-            Position pos2 = Ball.Position;
+            Position pos2 = BallPosition;
 
             return !(Math.Abs(pos1.Col - pos2.Col) > m_visibleDistance || Math.Abs(pos1.Row - pos2.Row) > m_visibleDistance);
         }
@@ -327,7 +452,7 @@ namespace GridSoccer.Simulator
             if (side == Sides.Right)
                 act = GetActionForRightSide(act);
 
-            bool hasBall = Ball.Position == Players[pi].Position;
+            bool hasBall = BallPosition == Players[pi].Position;
 
             if (hasBall) m_ballOwnerIndex = pi;
 
@@ -394,16 +519,16 @@ namespace GridSoccer.Simulator
                 if (m_sideReceivingGoal == Sides.Right)
                 {
                     if (defaultRightPlayer >= 0)
-                        Ball.Position.Set(Players[defaultRightPlayer].HomePosition);
+                        BallPosition.Set(Players[defaultRightPlayer].HomePosition);
                     else if (defaultLeftPlayer >= 0)
-                        Ball.Position.Set(Players[defaultLeftPlayer].HomePosition);
+                        BallPosition.Set(Players[defaultLeftPlayer].HomePosition);
                 }
                 else if (m_sideReceivingGoal == Sides.Left)
                 {
                     if (defaultLeftPlayer >= 0)
-                        Ball.Position.Set(Players[defaultLeftPlayer].HomePosition);
+                        BallPosition.Set(Players[defaultLeftPlayer].HomePosition);
                     else if (defaultRightPlayer >= 0)
-                        Ball.Position.Set(Players[defaultRightPlayer].HomePosition);
+                        BallPosition.Set(Players[defaultRightPlayer].HomePosition);
                 }
 
                 RaiseScoreChangedEvent();
@@ -411,7 +536,7 @@ namespace GridSoccer.Simulator
             else
             {
                 if (m_ballOwnerIndex < 0)
-                    m_ballOwnerIndex = FindPlayerAtLocation(Ball.Position);
+                    m_ballOwnerIndex = FindPlayerAtLocation(BallPosition);
 
                 bool conflictsFound = false;
 
@@ -485,7 +610,7 @@ namespace GridSoccer.Simulator
                         for (int i = 0; i < m_pendingActions.Length; ++i)
                         {
                             if (i != m_ballOwnerIndex && m_pendingActions[i].Updated &&
-                                m_pendingActions[i].DesiredPos == Ball.Position)
+                                m_pendingActions[i].DesiredPos == BallPosition)
                                 m_rndCandidChooser.AddCandidate(i, 1.0);
                         }
 
@@ -578,7 +703,7 @@ namespace GridSoccer.Simulator
                     }
 
                     if(nextBO >= 0)
-                        Ball.Position.Set(m_pendingActions[nextBO].NewPos);
+                        BallPosition.Set(m_pendingActions[nextBO].NewPos);
                 }
 
                 // in the end put the players at their new position

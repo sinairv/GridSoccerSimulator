@@ -8,7 +8,13 @@ namespace GridSoccer.Simulator.Net
 {
     public class MessageParser
     {
-        public static IMessageInfo ProcessInputMessage(string str)
+        /// <summary>
+        /// Parses the input message and returns an isntance of the 
+        /// <c>IMessageInfo</c> containing the parsed data.
+        /// </summary>
+        /// <param name="str">The string to parse.</param>
+        /// <returns></returns>
+        public static IMessageInfo ParseInputMessage(string str)
         {
             string[] toks = str.Split(new char[] { ' ', '(', ')', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 

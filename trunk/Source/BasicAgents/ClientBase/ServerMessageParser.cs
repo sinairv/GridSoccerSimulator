@@ -42,10 +42,10 @@ namespace GridSoccer.ClientBasic
                     int cl = Int32.Parse(ParserUtils.GetTokenAt(toks, 1));
                     return new CycleMessage() { CycleLength = cl };
                 }
-                else if (msg == "jet")
+                else if (msg == "turbo")
                 {
-                    bool isJetMode = (ParserUtils.GetTokenAt(toks, 1) == "on");
-                    return new JetMessage() { JetOn = isJetMode };
+                    bool isTurboMode = (ParserUtils.GetTokenAt(toks, 1) == "on");
+                    return new TurboMessage() { TurboOn = isTurboMode };
                 }
                 else if (msg == "error")
                 {

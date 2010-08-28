@@ -30,9 +30,6 @@
         {
             this.btnLoad = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
-            this.shapeContainer1 = new Microsoft.VisualBasic.PowerPacks.ShapeContainer();
-            this.lineShape2 = new Microsoft.VisualBasic.PowerPacks.LineShape();
-            this.lineShape1 = new Microsoft.VisualBasic.PowerPacks.LineShape();
             this.btnPerformDM = new System.Windows.Forms.Button();
             this.txtK = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -44,11 +41,17 @@
             this.cbIsOnline = new System.Windows.Forms.CheckBox();
             this.btnBatch = new System.Windows.Forms.Button();
             this.comboMethods = new System.Windows.Forms.ComboBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnLoad
             // 
-            this.btnLoad.Location = new System.Drawing.Point(12, 44);
+            this.btnLoad.Location = new System.Drawing.Point(6, 51);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 0;
@@ -58,7 +61,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(12, 15);
+            this.btnSave.Location = new System.Drawing.Point(6, 22);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 1;
@@ -66,37 +69,9 @@
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
-            // shapeContainer1
-            // 
-            this.shapeContainer1.Location = new System.Drawing.Point(0, 0);
-            this.shapeContainer1.Margin = new System.Windows.Forms.Padding(0);
-            this.shapeContainer1.Name = "shapeContainer1";
-            this.shapeContainer1.Shapes.AddRange(new Microsoft.VisualBasic.PowerPacks.Shape[] {
-            this.lineShape2,
-            this.lineShape1});
-            this.shapeContainer1.Size = new System.Drawing.Size(574, 145);
-            this.shapeContainer1.TabIndex = 4;
-            this.shapeContainer1.TabStop = false;
-            // 
-            // lineShape2
-            // 
-            this.lineShape2.Name = "lineShape2";
-            this.lineShape2.X1 = 376;
-            this.lineShape2.X2 = 376;
-            this.lineShape2.Y1 = 6;
-            this.lineShape2.Y2 = 131;
-            // 
-            // lineShape1
-            // 
-            this.lineShape1.Name = "lineShape1";
-            this.lineShape1.X1 = 232;
-            this.lineShape1.X2 = 232;
-            this.lineShape1.Y1 = 5;
-            this.lineShape1.Y2 = 130;
-            // 
             // btnPerformDM
             // 
-            this.btnPerformDM.Location = new System.Drawing.Point(244, 108);
+            this.btnPerformDM.Location = new System.Drawing.Point(20, 120);
             this.btnPerformDM.Name = "btnPerformDM";
             this.btnPerformDM.Size = new System.Drawing.Size(126, 23);
             this.btnPerformDM.TabIndex = 5;
@@ -106,7 +81,7 @@
             // 
             // txtK
             // 
-            this.txtK.Location = new System.Drawing.Point(293, 31);
+            this.txtK.Location = new System.Drawing.Point(69, 45);
             this.txtK.Name = "txtK";
             this.txtK.Size = new System.Drawing.Size(77, 20);
             this.txtK.TabIndex = 6;
@@ -116,7 +91,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(241, 34);
+            this.label1.Location = new System.Drawing.Point(17, 48);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(14, 13);
             this.label1.TabIndex = 7;
@@ -125,7 +100,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(241, 57);
+            this.label2.Location = new System.Drawing.Point(17, 71);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(49, 13);
             this.label2.TabIndex = 9;
@@ -133,7 +108,7 @@
             // 
             // txtMinSupp
             // 
-            this.txtMinSupp.Location = new System.Drawing.Point(293, 54);
+            this.txtMinSupp.Location = new System.Drawing.Point(69, 68);
             this.txtMinSupp.Name = "txtMinSupp";
             this.txtMinSupp.Size = new System.Drawing.Size(77, 20);
             this.txtMinSupp.TabIndex = 8;
@@ -143,7 +118,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(241, 83);
+            this.label3.Location = new System.Drawing.Point(17, 97);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(46, 13);
             this.label3.TabIndex = 11;
@@ -151,7 +126,7 @@
             // 
             // txtMinConf
             // 
-            this.txtMinConf.Location = new System.Drawing.Point(293, 80);
+            this.txtMinConf.Location = new System.Drawing.Point(69, 94);
             this.txtMinConf.Name = "txtMinConf";
             this.txtMinConf.Size = new System.Drawing.Size(77, 20);
             this.txtMinConf.TabIndex = 10;
@@ -160,7 +135,7 @@
             // 
             // btnShowStats
             // 
-            this.btnShowStats.Location = new System.Drawing.Point(12, 99);
+            this.btnShowStats.Location = new System.Drawing.Point(6, 101);
             this.btnShowStats.Name = "btnShowStats";
             this.btnShowStats.Size = new System.Drawing.Size(75, 23);
             this.btnShowStats.TabIndex = 12;
@@ -171,7 +146,7 @@
             // cbIsOnline
             // 
             this.cbIsOnline.AutoSize = true;
-            this.cbIsOnline.Location = new System.Drawing.Point(97, 19);
+            this.cbIsOnline.Location = new System.Drawing.Point(91, 26);
             this.cbIsOnline.Name = "cbIsOnline";
             this.cbIsOnline.Size = new System.Drawing.Size(97, 17);
             this.cbIsOnline.TabIndex = 13;
@@ -181,7 +156,7 @@
             // 
             // btnBatch
             // 
-            this.btnBatch.Location = new System.Drawing.Point(402, 108);
+            this.btnBatch.Location = new System.Drawing.Point(6, 23);
             this.btnBatch.Name = "btnBatch";
             this.btnBatch.Size = new System.Drawing.Size(126, 23);
             this.btnBatch.TabIndex = 15;
@@ -193,35 +168,65 @@
             // 
             this.comboMethods.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboMethods.FormattingEnabled = true;
-            this.comboMethods.Location = new System.Drawing.Point(244, 5);
+            this.comboMethods.Location = new System.Drawing.Point(20, 19);
             this.comboMethods.Name = "comboMethods";
             this.comboMethods.Size = new System.Drawing.Size(126, 21);
             this.comboMethods.TabIndex = 16;
             this.comboMethods.SelectedIndexChanged += new System.EventHandler(this.comboMethods_SelectedIndexChanged);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.btnSave);
+            this.groupBox1.Controls.Add(this.btnLoad);
+            this.groupBox1.Controls.Add(this.btnShowStats);
+            this.groupBox1.Controls.Add(this.cbIsOnline);
+            this.groupBox1.Location = new System.Drawing.Point(3, 5);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(217, 176);
+            this.groupBox1.TabIndex = 17;
+            this.groupBox1.TabStop = false;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.comboMethods);
+            this.groupBox2.Controls.Add(this.btnPerformDM);
+            this.groupBox2.Controls.Add(this.txtK);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Controls.Add(this.label3);
+            this.groupBox2.Controls.Add(this.txtMinSupp);
+            this.groupBox2.Controls.Add(this.txtMinConf);
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Location = new System.Drawing.Point(226, 5);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(200, 176);
+            this.groupBox2.TabIndex = 18;
+            this.groupBox2.TabStop = false;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.btnBatch);
+            this.groupBox3.Location = new System.Drawing.Point(432, 5);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(151, 176);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            // 
             // ControllerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(574, 145);
-            this.Controls.Add(this.comboMethods);
-            this.Controls.Add(this.btnBatch);
-            this.Controls.Add(this.cbIsOnline);
-            this.Controls.Add(this.btnShowStats);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.txtMinConf);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.txtMinSupp);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.txtK);
-            this.Controls.Add(this.btnPerformDM);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.btnLoad);
-            this.Controls.Add(this.shapeContainer1);
+            this.ClientSize = new System.Drawing.Size(593, 189);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Name = "ControllerForm";
             this.Text = "ControllerForm";
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -229,8 +234,6 @@
 
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.Button btnSave;
-        private Microsoft.VisualBasic.PowerPacks.ShapeContainer shapeContainer1;
-        private Microsoft.VisualBasic.PowerPacks.LineShape lineShape1;
         private System.Windows.Forms.Button btnPerformDM;
         private System.Windows.Forms.TextBox txtK;
         private System.Windows.Forms.Label label1;
@@ -239,9 +242,11 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtMinConf;
         private System.Windows.Forms.Button btnShowStats;
-        private Microsoft.VisualBasic.PowerPacks.LineShape lineShape2;
         private System.Windows.Forms.CheckBox cbIsOnline;
         private System.Windows.Forms.Button btnBatch;
         private System.Windows.Forms.ComboBox comboMethods;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }

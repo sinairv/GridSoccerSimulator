@@ -78,14 +78,14 @@ namespace GridSoccer.ClientBasic
         public string[] SettingsMsgTokens;
     }
 
-    public class JetMessage : IMessageInfo
+    public class TurboMessage : IMessageInfo
     {
-        public JetMessage()
+        public TurboMessage()
         {
-            MessageType = MessageTypes.Jet;
+            MessageType = MessageTypes.Turbo;
         }
 
-        public bool JetOn;
+        public bool TurboOn;
     }
 
 

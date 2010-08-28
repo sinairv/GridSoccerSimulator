@@ -9,6 +9,12 @@ namespace GridSoccer.Simulator
 {
     public static class PositionExtensions
     {
+        /// <summary>
+        /// Gets the right-to-left coordination as if the point has been
+        /// mirrored with respect to the center of the field.
+        /// </summary>
+        /// <param name="pos">The position.</param>
+        /// <returns></returns>
         public static Position GetRTL(this Position pos)
         {
             int r = Settings.Default.NumRows - pos.Row + 1;

@@ -7,6 +7,9 @@ using System.IO;
 
 namespace GridSoccer.Simulator.Net
 {
+    /// <summary>
+    /// Encapsulates information about each network client
+    /// </summary>
     public class ClientInfo
     {
         private TcpClient client;

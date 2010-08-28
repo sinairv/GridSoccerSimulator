@@ -31,7 +31,7 @@ namespace GridSoccer.ClientBasic
         public Position BallPosition { get; private set; }
         public bool IsGameStarted { get; private set; }
         private int CycleLength { get; set; }
-        private bool JetMode { get; set; }
+        private bool TurboMode { get; set; }
 
         public int[] LastSeePlayers { get; private set; }
         public Position[] PlayerPositions { get; private set; }
@@ -279,8 +279,8 @@ namespace GridSoccer.ClientBasic
                     case MessageTypes.Cycle:
                         CycleLength = (imi as CycleMessage).CycleLength;
                         return false;
-                    case MessageTypes.Jet:
-                        JetMode = (imi as JetMessage).JetOn;
+                    case MessageTypes.Turbo:
+                        TurboMode = (imi as TurboMessage).TurboOn;
                         return false;
                 }
             }
@@ -308,7 +308,7 @@ namespace GridSoccer.ClientBasic
             {
                 if(UpdateFromServer())
                     ThinkBase();
-                //if(!JetMode)
+                //if(!TurboMode)
                 Thread.Sleep(1);
             }
             OnGameStopped();

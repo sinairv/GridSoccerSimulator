@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -13,13 +12,30 @@ namespace GridSoccer.Simulator.Monitor
 {
     public partial class SoccerField : UserControl
     {
+        private SoccerSimulator m_simulator = null;
+
+        private Bitmap m_fieldBitmap = null;
+        private Bitmap m_rightPlayerBitmap = null;
+        private Bitmap m_leftPlayerBitmap = null;
+        private Bitmap m_ballBitmap = null;
+
+        private int m_sideLen;
+        private int m_pitchWidth;
+        private int m_pitchHeight;
+        private int m_sx;
+        private int m_sy;
+        private int m_fontSize;
+        private Font m_font = null;
+        private SizeF m_textSize;
+
+        private const int internalPadding = 10;
+        private const int goalPadding = 5;
+
         public SoccerField()
         {
             InitializeComponent();
             this.MinimumSize = new Size(2 * internalPadding + 10, 2 * internalPadding + 10);
         }
-
-        private SoccerSimulator m_simulator = null;
 
         public void SetSimulator(SoccerSimulator sim)
         {
@@ -39,16 +55,20 @@ namespace GridSoccer.Simulator.Monitor
 
         private void SoccerField_Paint(object sender, PaintEventArgs e)
         {
+            // TODO: look for a thread-safe method to render current game-status.
+            // e.g., some Simulator.GetCurSnapShot() which returns all the positions, and data
+            // about the players and is implemented with appropriate locks in the simulator itself
+
             Graphics g = e.Graphics;
 
             if (m_fieldBitmap == null)
-                m_fieldBitmap = GetFieldBitmap();
+                m_fieldBitmap = CreateFieldBitmap();
             if(m_leftPlayerBitmap == null)
-                m_leftPlayerBitmap = GetLeftPlayerBitmap();
+                m_leftPlayerBitmap = CreateLeftPlayerBitmap();
             if(m_rightPlayerBitmap == null)
-                m_rightPlayerBitmap = GetRightPlayerBitmap();
+                m_rightPlayerBitmap = CreateRightPlayerBitmap();
             if (m_ballBitmap == null)
-                m_ballBitmap = GetBallBitmap();
+                m_ballBitmap = CreateBallBitmap();
 
             g.DrawImage(m_fieldBitmap, new Point(0, 0));
 
@@ -56,9 +76,9 @@ namespace GridSoccer.Simulator.Monitor
                 return;
 
             int bownerUnum = -1;
-            ObjectInfo ball = m_simulator.Ball;
+            Position ballPos = m_simulator.BallPosition;
 
-            ObjectInfo player;
+            PlayerInfo player;
             int count = m_simulator.LeftPlayersCount + m_simulator.RightPlayersCount;
             for(int i = 0; i < count; ++i)
             {
@@ -68,12 +88,12 @@ namespace GridSoccer.Simulator.Monitor
                 else if(player.Side == Sides.Right)
                     DrawRightPlayer(g, player.Row, player.Col, player.PlayerNumber);
 
-                if (bownerUnum == -1 && ball.Row == player.Row && ball.Col == player.Col)
+                if (bownerUnum == -1 && ballPos.Row == player.Row && ballPos.Col == player.Col)
                     bownerUnum = player.PlayerNumber;
             }
 
             if(bownerUnum != -1)
-                DrawBall(g, ball.Row, ball.Col, bownerUnum);
+                DrawBall(g, ballPos.Row, ballPos.Col, bownerUnum);
         }
 
         private void DrawBall(Graphics g, int r, int c, int unum)
@@ -105,26 +125,7 @@ namespace GridSoccer.Simulator.Monitor
                 return ((char)('A' + (unum - 10))).ToString() ;
         }
 
-
-
-        private Bitmap m_fieldBitmap = null;
-        private Bitmap m_rightPlayerBitmap = null;
-        private Bitmap m_leftPlayerBitmap = null;
-        private Bitmap m_ballBitmap = null;
-
-        private int m_sideLen;
-        private int m_pitchWidth;
-        private int m_pitchHeight;
-        private int m_sx;
-        private int m_sy;
-        private int m_fontSize;
-        private Font m_font = null;
-        private SizeF m_textSize;
-            
-        private const int internalPadding = 10;
-        private const int goalPadding = 5;
-
-        private Bitmap GetFieldBitmap()
+        private Bitmap CreateFieldBitmap()
         {
             Bitmap bmp = new Bitmap(this.Width, this.Height);
 
@@ -170,7 +171,7 @@ namespace GridSoccer.Simulator.Monitor
             return bmp;
         }
 
-        private Bitmap GetLeftPlayerBitmap()
+        private Bitmap CreateLeftPlayerBitmap()
         {
             Bitmap bmp = new Bitmap(m_sideLen, m_sideLen);
 
@@ -182,7 +183,7 @@ namespace GridSoccer.Simulator.Monitor
             return bmp;
         }
 
-        private Bitmap GetRightPlayerBitmap()
+        private Bitmap CreateRightPlayerBitmap()
         {
             Bitmap bmp = new Bitmap(m_sideLen, m_sideLen);
 
@@ -194,7 +195,7 @@ namespace GridSoccer.Simulator.Monitor
             return bmp;
         }
 
-        private Bitmap GetBallBitmap()
+        private Bitmap CreateBallBitmap()
         {
             Bitmap bmp = new Bitmap(m_sideLen, m_sideLen);
 
@@ -210,10 +211,10 @@ namespace GridSoccer.Simulator.Monitor
         {
             if (m_fieldBitmap == null || m_fieldBitmap.Width != this.Width || m_fieldBitmap.Height != this.Height)
             {
-                m_fieldBitmap = GetFieldBitmap();
-                m_rightPlayerBitmap = GetRightPlayerBitmap();
-                m_leftPlayerBitmap = GetLeftPlayerBitmap();
-                m_ballBitmap = GetBallBitmap();
+                m_fieldBitmap = CreateFieldBitmap();
+                m_rightPlayerBitmap = CreateRightPlayerBitmap();
+                m_leftPlayerBitmap = CreateLeftPlayerBitmap();
+                m_ballBitmap = CreateBallBitmap();
             }
 
             this.Invalidate();

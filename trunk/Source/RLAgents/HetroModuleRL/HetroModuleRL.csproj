@@ -12,6 +12,7 @@
     <AssemblyName>HetroModuleRL</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>Clients.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,18 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GridSoccer.ClientBasic, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Bin\GridSoccer.ClientBasic.dll</HintPath>
-    </Reference>
-    <Reference Include="GridSoccer.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Bin\GridSoccer.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="GridSoccer.RLAgentsCommon, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Bin\GridSoccer.RLAgentsCommon.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -53,6 +42,23 @@
     <Compile Include="HetroModuleRLClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BasicAgents\ClientBase\ClientBase.csproj">
+      <Project>{9719298C-7F9B-4611-8AB5-668904D29CE1}</Project>
+      <Name>ClientBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GridSoccerSimulator\Common\Common.csproj">
+      <Project>{E2F59C55-04EF-43D7-AC6B-72650BBF99D2}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RLAgentsCommon\RLAgentsCommon.csproj">
+      <Project>{DA6808F6-1395-4AA3-B59E-26ED211AADD0}</Project>
+      <Name>RLAgentsCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Clients.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

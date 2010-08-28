@@ -5,7 +5,7 @@ namespace GridSoccer.Common
     public enum MessageTypes
     {
         Illegal, Init, Move, Pass, Hold, Home,
-        Settings, InitOK, InitError, Error, See, Start, Stop, Cycle, Jet
+        Settings, InitOK, InitError, Error, See, Start, Stop, Cycle, Turbo
     }
 
     public abstract class IMessageInfo
