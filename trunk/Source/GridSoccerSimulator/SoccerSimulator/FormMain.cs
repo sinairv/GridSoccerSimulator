@@ -27,7 +27,11 @@ namespace GridSoccer.Simulator
             // make some buttons disabled
             tbtnStep.Enabled = false;
             tbtnStop.Enabled = false;
+        }
 
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            // other control initializations, for these need the window handle to be created
             m_simController.GameCyclesFinished += new EventHandler(simController_GameCyclesFinished);
             propController.SelectedObject = new SimulationControllerProperties(m_simController);
             m_simController.BindMonitor(soccerMonitor);
@@ -95,6 +99,7 @@ namespace GridSoccer.Simulator
             {
                 tbtnStop.Enabled = true;
                 tbtnStep.Enabled = true;
+                tbtnSettings.Visible = false;
                 m_simController.Start();
             }
             else if(m_simController.IsPaused)
@@ -174,6 +179,34 @@ namespace GridSoccer.Simulator
             }
         }
 
+        private void SettingsAction()
+        {
+            if (m_simController.IsGameStarted)
+            {
+                return;
+            }
+
+            using (SettingsDialog frm = new SettingsDialog())
+            {
+                frm.ShowDialog();
+            }
+        }
+
+        private void AboutAction()
+        {
+            bool wasPaused = m_simController.IsPaused;
+            if (!wasPaused)
+                m_simController.TogglePauseResume();
+
+            using (AboutBoxGridSoccer frm = new AboutBoxGridSoccer())
+            {
+                frm.ShowDialog();
+            }
+
+            if (!wasPaused)
+                m_simController.TogglePauseResume();
+        }
+
         #endregion
 
         #region ToolBarButtons Events
@@ -216,7 +249,20 @@ namespace GridSoccer.Simulator
         {
             BindUnbindMonitorAction();
         }
+
+        private void tbtnSettings_Click(object sender, EventArgs e)
+        {
+            SettingsAction();
+        }
+
+        private void tbtnAbout_Click(object sender, EventArgs e)
+        {
+            AboutAction();
+        }
+
         #endregion
+
+
 
     }
 }

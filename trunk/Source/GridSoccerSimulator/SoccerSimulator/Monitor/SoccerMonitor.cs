@@ -20,8 +20,6 @@ namespace GridSoccer.Simulator.Monitor
         private bool m_gameStateChanged = false;
         private bool m_gameScoreChanged = true;
 
-
-
         public SoccerMonitor()
         {
             InitializeComponent();
@@ -56,7 +54,6 @@ namespace GridSoccer.Simulator.Monitor
         private void TimerUpdateUICallBack(object args)
         {
             //DisableTimer();
-            //timerUpdate.Enabled = false;
 
             if (m_gameScoreChanged)
             {
@@ -77,7 +74,6 @@ namespace GridSoccer.Simulator.Monitor
 
             //if(m_isBound)
             //    EnableTimer();
-            //timerUpdate.Enabled = m_isBound;
         }
 
         public void BindToSimulator(SoccerSimulator sim)

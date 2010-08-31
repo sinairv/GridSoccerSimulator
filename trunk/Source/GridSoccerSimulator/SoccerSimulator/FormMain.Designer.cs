@@ -43,6 +43,9 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tbtnBindMonitor = new System.Windows.Forms.ToolStripButton();
             this.tbtnUnbindMonitor = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tbtnSettings = new System.Windows.Forms.ToolStripButton();
+            this.tbtnAbout = new System.Windows.Forms.ToolStripButton();
             this.soccerMonitor = new GridSoccer.Simulator.Monitor.SoccerMonitor();
             this.panelControlsContainer.SuspendLayout();
             this.toolStripMain.SuspendLayout();
@@ -87,7 +90,11 @@
             this.tbtnNormalSpeed,
             this.toolStripSeparator1,
             this.tbtnBindMonitor,
-            this.tbtnUnbindMonitor});
+            this.tbtnUnbindMonitor,
+            this.toolStripSeparator3,
+            this.tbtnSettings,
+            this.tbtnAbout,
+            });
             this.toolStripMain.Location = new System.Drawing.Point(0, 0);
             this.toolStripMain.Name = "toolStripMain";
             this.toolStripMain.Size = new System.Drawing.Size(599, 55);
@@ -188,11 +195,37 @@
                 "de)";
             this.tbtnUnbindMonitor.Click += new System.EventHandler(this.tbtnUnbindMonitor_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 55);
+            // 
+            // tbtnSettings
+            // 
+            this.tbtnSettings.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnSettings.Image = ((System.Drawing.Image)(resources.GetObject("tbtnSettings.Image")));
+            this.tbtnSettings.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnSettings.Name = "tbtnSettings";
+            this.tbtnSettings.Size = new System.Drawing.Size(52, 52);
+            this.tbtnSettings.Text = "Settings";
+            this.tbtnSettings.Click += new System.EventHandler(this.tbtnSettings_Click);
+            // 
+            // tbtnAbout
+            // 
+            this.tbtnAbout.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnAbout.Image = ((System.Drawing.Image)(resources.GetObject("tbtnAbout.Image")));
+            this.tbtnAbout.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnAbout.Name = "tbtnAbout";
+            this.tbtnAbout.Size = new System.Drawing.Size(52, 52);
+            this.tbtnAbout.Text = "About Grid-Soccer Simulator";
+            this.tbtnAbout.Click += new System.EventHandler(this.tbtnAbout_Click);
+            // 
             // soccerMonitor
             // 
             this.soccerMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.soccerMonitor.IntervalUpdateUI = 500;
             this.soccerMonitor.Location = new System.Drawing.Point(3, 3);
             this.soccerMonitor.Name = "soccerMonitor";
             this.soccerMonitor.Size = new System.Drawing.Size(590, 434);
@@ -210,6 +243,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
             this.Text = "Grid-Soccer Simulator";
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             this.panelControlsContainer.ResumeLayout(false);
             this.toolStripMain.ResumeLayout(false);
@@ -236,6 +270,9 @@
         private System.Windows.Forms.ToolStripButton tbtnPause;
         private System.Windows.Forms.ToolStripButton tbtnNormalSpeed;
         private System.Windows.Forms.ToolStripButton tbtnUnbindMonitor;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton tbtnSettings;
+        private System.Windows.Forms.ToolStripButton tbtnAbout;
 
     }
 }
