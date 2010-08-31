@@ -29,17 +29,20 @@ namespace GridSoccer.Simulator
             tbtnStop.Enabled = false;
 
             m_simController.GameCyclesFinished += new EventHandler(simController_GameCyclesFinished);
-            propController.SelectedObject = m_simController;
+            propController.SelectedObject = new SimulationControllerProperties(m_simController);
             m_simController.BindMonitor(soccerMonitor);
             m_isMonitorBinded = true;
         }
 
         void simController_GameCyclesFinished(object sender, EventArgs e)
         {
-            tbtnStep.Enabled = false;
-            tbtnStartResume.Enabled = false;
-            tbtnStop.Enabled = false;
-            tbtnTurbo.Enabled = false;
+            this.Invoke(new Action(() =>
+            {
+                tbtnStep.Enabled = false;
+                tbtnStartResume.Enabled = false;
+                tbtnStop.Enabled = false;
+                tbtnTurbo.Enabled = false;
+            }));
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -50,7 +53,10 @@ namespace GridSoccer.Simulator
                 if (!wasPaused)
                     m_simController.TogglePauseResume();
 
-                if (DialogResult.Yes == MessageBox.Show("Are you sure you want to stop the game and exit?", "Exit?", MessageBoxButtons.YesNo))
+                if (DialogResult.Yes == MessageBox.Show(
+                    "Are you sure you want to stop the game and exit?", 
+                    "Exit?", 
+                    MessageBoxButtons.YesNo))
                 {
                     m_simController.Stop();
                 }
@@ -62,7 +68,6 @@ namespace GridSoccer.Simulator
                 }
             }
         }
-
 
         private void ToggleBindUnbindButtonUI(bool toBind)
         {
@@ -157,19 +162,13 @@ namespace GridSoccer.Simulator
             if (m_simController.TurboMode)
             {
                 m_simController.TurboMode = false;
-                if (!m_simController.TurboMode)
-                {
-                    ToggleTurboNormalButtonUI(true);
-                }
+                ToggleTurboNormalButtonUI(true);
             }
             else
             {
                 if (m_simController.IsGameStarted)
                 {
                     ToggleTurboNormalButtonUI(false);
-
-                    Application.DoEvents();
-
                     m_simController.TurboMode = true;
                 }
             }
@@ -192,7 +191,6 @@ namespace GridSoccer.Simulator
         {
             StopAction();
         }
-
 
         private void tbtnPause_Click(object sender, EventArgs e)
         {

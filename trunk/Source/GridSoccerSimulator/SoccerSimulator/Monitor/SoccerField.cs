@@ -37,20 +37,14 @@ namespace GridSoccer.Simulator.Monitor
             this.MinimumSize = new Size(2 * internalPadding + 10, 2 * internalPadding + 10);
         }
 
+        public void UpdateField()
+        {
+            this.Invalidate();
+        }
+
         public void SetSimulator(SoccerSimulator sim)
         {
             m_simulator = sim;
-            m_simulator.Changed += new EventHandler(m_simulator_Changed);
-        }
-
-        public void UnbindSimulator(SoccerSimulator sim)
-        {
-            m_simulator.Changed -= new EventHandler(m_simulator_Changed);
-        }
-
-        void m_simulator_Changed(object sender, EventArgs e)
-        {
-            this.Invalidate();
         }
 
         private void SoccerField_Paint(object sender, PaintEventArgs e)

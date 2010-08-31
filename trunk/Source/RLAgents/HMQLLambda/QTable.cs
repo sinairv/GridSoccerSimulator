@@ -44,8 +44,8 @@ namespace GridSoccer.HMQLLambda
                 AddModule(new SelfAndTeammateModule(rows, cols, teammatesCount, myUnum, 0));
                 AddModule(new SelfAndOneOpponentModule(rows, cols, teammatesCount, myUnum, 0));
                 AddModule(new SelfAndOneOpponentModule(rows, cols, teammatesCount, myUnum, 1));
-                //AddModule(new TripleModule(rows, cols, teammatesCount, myUnum, 0, 0));
-                //AddModule(new TripleModule(rows, cols, teammatesCount, myUnum, 0, 1));
+                AddModule(new TripleModule(rows, cols, teammatesCount, myUnum, 0, 0));
+                AddModule(new TripleModule(rows, cols, teammatesCount, myUnum, 0, 1));
             }
         }
 

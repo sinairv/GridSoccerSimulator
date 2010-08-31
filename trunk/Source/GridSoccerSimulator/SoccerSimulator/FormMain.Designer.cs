@@ -34,16 +34,16 @@
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.toolStripMain = new System.Windows.Forms.ToolStrip();
             this.tbtnStartResume = new System.Windows.Forms.ToolStripButton();
+            this.tbtnPause = new System.Windows.Forms.ToolStripButton();
             this.tbtnStep = new System.Windows.Forms.ToolStripButton();
             this.tbtnStop = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tbtnTurbo = new System.Windows.Forms.ToolStripButton();
+            this.tbtnNormalSpeed = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tbtnBindMonitor = new System.Windows.Forms.ToolStripButton();
-            this.soccerMonitor = new GridSoccer.Simulator.Monitor.SoccerMonitor();
-            this.tbtnPause = new System.Windows.Forms.ToolStripButton();
-            this.tbtnNormalSpeed = new System.Windows.Forms.ToolStripButton();
             this.tbtnUnbindMonitor = new System.Windows.Forms.ToolStripButton();
+            this.soccerMonitor = new GridSoccer.Simulator.Monitor.SoccerMonitor();
             this.panelControlsContainer.SuspendLayout();
             this.toolStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -105,6 +105,16 @@
             this.tbtnStartResume.ToolTipText = "Start or Resume Game";
             this.tbtnStartResume.Click += new System.EventHandler(this.tbtnStartResume_Click);
             // 
+            // tbtnPause
+            // 
+            this.tbtnPause.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnPause.Image = ((System.Drawing.Image)(resources.GetObject("tbtnPause.Image")));
+            this.tbtnPause.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnPause.Name = "tbtnPause";
+            this.tbtnPause.Size = new System.Drawing.Size(52, 52);
+            this.tbtnPause.Text = "Pause";
+            this.tbtnPause.Click += new System.EventHandler(this.tbtnPause_Click);
+            // 
             // tbtnStep
             // 
             this.tbtnStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -141,6 +151,16 @@
             this.tbtnTurbo.ToolTipText = "Enable Turbo (no delay between cycles)";
             this.tbtnTurbo.Click += new System.EventHandler(this.tbtnTurbo_Click);
             // 
+            // tbtnNormalSpeed
+            // 
+            this.tbtnNormalSpeed.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnNormalSpeed.Image = ((System.Drawing.Image)(resources.GetObject("tbtnNormalSpeed.Image")));
+            this.tbtnNormalSpeed.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnNormalSpeed.Name = "tbtnNormalSpeed";
+            this.tbtnNormalSpeed.Size = new System.Drawing.Size(52, 52);
+            this.tbtnNormalSpeed.Text = "Disable Turbo";
+            this.tbtnNormalSpeed.Click += new System.EventHandler(this.tbtnNormalSpeed_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -153,8 +173,20 @@
             this.tbtnBindMonitor.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tbtnBindMonitor.Name = "tbtnBindMonitor";
             this.tbtnBindMonitor.Size = new System.Drawing.Size(52, 52);
-            this.tbtnBindMonitor.Text = "Turn Monitor On (may decrease simulation performance)";
+            this.tbtnBindMonitor.Text = "Monitor is Turned Off (may improve simulation performance, especially in turbo mo" +
+                "de)";
             this.tbtnBindMonitor.Click += new System.EventHandler(this.tbtnBindMonitor_Click);
+            // 
+            // tbtnUnbindMonitor
+            // 
+            this.tbtnUnbindMonitor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnUnbindMonitor.Image = ((System.Drawing.Image)(resources.GetObject("tbtnUnbindMonitor.Image")));
+            this.tbtnUnbindMonitor.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnUnbindMonitor.Name = "tbtnUnbindMonitor";
+            this.tbtnUnbindMonitor.Size = new System.Drawing.Size(52, 52);
+            this.tbtnUnbindMonitor.Text = "Monitor is Turned On (may decrease simulation performance, especially in turbo mo" +
+                "de)";
+            this.tbtnUnbindMonitor.Click += new System.EventHandler(this.tbtnUnbindMonitor_Click);
             // 
             // soccerMonitor
             // 
@@ -165,36 +197,6 @@
             this.soccerMonitor.Name = "soccerMonitor";
             this.soccerMonitor.Size = new System.Drawing.Size(590, 434);
             this.soccerMonitor.TabIndex = 0;
-            // 
-            // tbtnPause
-            // 
-            this.tbtnPause.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnPause.Image = ((System.Drawing.Image)(resources.GetObject("tbtnPause.Image")));
-            this.tbtnPause.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnPause.Name = "tbtnPause";
-            this.tbtnPause.Size = new System.Drawing.Size(52, 52);
-            this.tbtnPause.Text = "Pause";
-            this.tbtnPause.Click += new System.EventHandler(this.tbtnPause_Click);
-            // 
-            // tbtnNormalSpeed
-            // 
-            this.tbtnNormalSpeed.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnNormalSpeed.Image = ((System.Drawing.Image)(resources.GetObject("tbtnNormalSpeed.Image")));
-            this.tbtnNormalSpeed.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnNormalSpeed.Name = "tbtnNormalSpeed";
-            this.tbtnNormalSpeed.Size = new System.Drawing.Size(52, 52);
-            this.tbtnNormalSpeed.Text = "Disable Turbo";
-            this.tbtnNormalSpeed.Click += new System.EventHandler(this.tbtnNormalSpeed_Click);
-            // 
-            // tbtnUnbindMonitor
-            // 
-            this.tbtnUnbindMonitor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnUnbindMonitor.Image = ((System.Drawing.Image)(resources.GetObject("tbtnUnbindMonitor.Image")));
-            this.tbtnUnbindMonitor.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnUnbindMonitor.Name = "tbtnUnbindMonitor";
-            this.tbtnUnbindMonitor.Size = new System.Drawing.Size(52, 52);
-            this.tbtnUnbindMonitor.Text = "Turn Monitor Off (may improve simulation performance)";
-            this.tbtnUnbindMonitor.Click += new System.EventHandler(this.tbtnUnbindMonitor_Click);
             // 
             // FormMain
             // 

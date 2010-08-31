@@ -53,8 +53,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FormMain.cs">
@@ -115,6 +117,7 @@
     </Compile>
     <Compile Include="RandomCandidateChooser.cs" />
     <Compile Include="SimulationController.cs" />
+    <Compile Include="SimulationControllerProperties.cs" />
     <Compile Include="SoccerSimulator.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,15 +4,23 @@ using System.Linq;
 using System.Text;
 using GridSoccer.Simulator.Properties;
 using GridSoccer.Simulator.Net;
-using System.Windows.Forms;
 using GridSoccer.Simulator.Monitor;
-using System.ComponentModel;
+using System.Threading;
 
 namespace GridSoccer.Simulator
 {
     public class SimulationController
     {
+        #region Internal Types
+        private enum ControllerActionTypes
+        {
+            Start, Stop, Step, BindMonitor, UnbindMonitor, TogglePauseResume,
+            EnableTurbo, DisableTurbo
+        }
+        #endregion
+
         #region Private Fields
+        
         private bool m_waitForAllPlayers;
 
         private int m_cycleLength;
@@ -21,28 +29,28 @@ namespace GridSoccer.Simulator
         private bool m_turboMode;
         private bool m_preWaitForAll;
 
-        private int m_doEventInterval = 2000;
-
         private SoccerSimulator m_simulator;
         private Server m_server;
-        private Timer m_timer;
+        private SoccerMonitor m_mainMonitor = null;
+        //private Timer m_timer;
 
         private bool m_isGameStopped = false;
 
         bool m_isPaused = false;
 
+        private Queue<KeyValuePair<ControllerActionTypes, object>> m_queueActions =
+            new Queue<KeyValuePair<ControllerActionTypes, object>>();
+
+
+        private AutoResetEvent m_eventInitialized = new AutoResetEvent(false);
+        private Thread m_simThread;
+
         #endregion 
 
         #region Public Properties
 
-        [Category("Game Settings")]
-        [Description("The length of each time cycle in milli-seconds.")]
-        [DisplayName("Game Duration")]
         public long GameDuration { get; set; }
 
-        [Category("Game Settings")]
-        [Description("If set to true, the simulator waits for each connected player to send their command, before going to the next time-cycle. This prevents the players from loosing cycles (maybe needed for some experiments), but may cause the simulation to become less smooth.")]
-        [DisplayName("Wait For All Players")]
         public bool WaitForAllPlayers 
         {
             get
@@ -56,9 +64,6 @@ namespace GridSoccer.Simulator
             }
         }
 
-        [Category("Game Settings")]
-        [Description("The totoal number of time cycles in a game.")]
-        [DisplayName("Cycle Length")]
         public int CycleLength 
         {
             get
@@ -68,17 +73,19 @@ namespace GridSoccer.Simulator
 
             set
             {
-                m_cycleLength = value;
-
-                if (m_simulator.Cycle > 0)
+                if (value > 0)
                 {
+                    if(m_mainMonitor != null)
+                    {
+                        m_mainMonitor.IntervalUpdateUI = value;
+                    }
+                    m_cycleLength = value;
                     m_server.SendAllPlayers(String.Format("(cycle {0})", value));
-                    this.m_timer.Interval = value;
+
                 }
             }
         }
 
-        [Browsable(false)]
         public bool TurboMode
         {
             get
@@ -90,46 +97,15 @@ namespace GridSoccer.Simulator
             {
                 if (value)
                 {
-                    if (m_simulator.IsGameStarted)
-                    {
-                        m_timer.Enabled = false;
-                        m_preWaitForAll = WaitForAllPlayers;
-                        WaitForAllPlayers = true;
-                        m_turboMode = true;
-                        m_server.SendAllPlayers("(turbo on)");
-                        EnableTurbo();
-                    }
+                    EnqueAction(ControllerActionTypes.EnableTurbo, null);
                 }
                 else
                 {
-                    if(m_turboMode)
-                    {
-                        m_turboMode = false;
-                        WaitForAllPlayers = m_preWaitForAll;
-                        m_server.SendAllPlayers("(turbo off)");
-                        m_timer.Enabled = true;
-                    }
+                    EnqueAction(ControllerActionTypes.DisableTurbo, null);
                 }
             }
         }
 
-        [Category("Turbo Mode Settings")]
-        [Description("Sets the period in which Application.DoEvent() is called whenever in Turbo mode.")]
-        [DisplayName("Do-Event Period")]
-        public int DoEventInterval
-        {
-            get
-            {
-                return m_doEventInterval;
-            }
-
-            set
-            {
-                m_doEventInterval = value;
-            }
-        }
-
-        [Browsable(false)]
         public bool IsGameStopped
         {
             get
@@ -138,7 +114,6 @@ namespace GridSoccer.Simulator
             }
         }
 
-        [Browsable(false)]
         public bool IsGameStarted
         {
             get
@@ -148,7 +123,6 @@ namespace GridSoccer.Simulator
         }
 
 
-        [Browsable(false)]
         public bool IsPaused
         {
             get
@@ -160,7 +134,27 @@ namespace GridSoccer.Simulator
         #endregion 
 
         #region Constructors
+
         public SimulationController(int randomSeed)
+        {
+            m_simThread = new Thread(ThreadCallBack);
+            m_simThread.Name = "SimThread"; // good for debugging purposes
+            m_simThread.Start();
+
+            // do not return until initialization is finished
+            m_eventInitialized.WaitOne();
+        }
+
+        public SimulationController()
+            : this((int)DateTime.Now.Ticks)
+        {
+        }
+
+        #endregion
+
+        #region Thread Related Methods
+
+        private void ThreadCallBack()
         {
             m_simulator = new SoccerSimulator((int)DateTime.Now.Ticks);
             m_server = new Server(m_simulator, Settings.Default.PortNumber);
@@ -169,15 +163,74 @@ namespace GridSoccer.Simulator
             CycleLength = Settings.Default.CycleDuration;
             WaitForAllPlayers = Settings.Default.WaitForAllPlayers;
 
-            m_timer = new Timer();
-            m_timer.Interval = 100;
-            m_timer.Tick += new EventHandler(m_timer_Tick_accepting_connections);
-            m_timer.Enabled = true;
+            m_eventInitialized.Set();
+
+            while (!m_isGameStopped)
+            {
+                // Process the queue of all actions
+                lock (m_queueActions)
+                {
+                    while (m_queueActions.Count > 0)
+                    {
+                        var pair = m_queueActions.Dequeue();
+                        switch (pair.Key)
+                        {
+                            case ControllerActionTypes.Start:
+                                ActionStart();
+                                break;
+                            case ControllerActionTypes.Stop:
+                                ActionStop();
+                                break;
+                            case ControllerActionTypes.Step:
+                                ActionStep();
+                                break;
+                            case ControllerActionTypes.TogglePauseResume:
+                                ActionTogglePauseResume();
+                                break;
+                            case ControllerActionTypes.BindMonitor:
+                                ActionBindMonitor(pair.Value);
+                                break;
+                            case ControllerActionTypes.UnbindMonitor:
+                                ActionUnbindMonitor(pair.Value);
+                                break;
+                            case ControllerActionTypes.EnableTurbo:
+                                ActionEnableTurbo();
+                                break;
+                            case ControllerActionTypes.DisableTurbo:
+                                ActionDisableTurbo();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                if (IsGameStarted)
+                {
+                    PlayOnStep();
+                }
+                else
+                {
+                    AcceptConnectionStep();
+                }
+
+                if (!m_turboMode)
+                {
+                    Thread.Sleep(m_cycleLength);
+                }
+                //else
+                //{
+                //    Thread.Sleep(1);
+                //}
+            }
         }
 
-        public SimulationController()
-            : this((int)DateTime.Now.Ticks)
+        private void EnqueAction(ControllerActionTypes action, object args)
         {
+            lock (m_queueActions)
+            {
+                m_queueActions.Enqueue(new KeyValuePair<ControllerActionTypes, object>(action, args));
+            }
         }
 
         #endregion 
@@ -187,27 +240,31 @@ namespace GridSoccer.Simulator
 
         #endregion
 
-        #region Public Methods
+        #region Action... Methods
 
-        public void BindMonitor(SoccerMonitor monitor)
+        private void ActionBindMonitor(object arg)
         {
-            monitor.SetSimulator(m_simulator);
+            SoccerMonitor monitor = arg as SoccerMonitor;
+            if (monitor != null)
+            {
+                monitor.IntervalUpdateUI = this.CycleLength;
+                monitor.BindToSimulator(m_simulator);
+            }
         }
 
-        public void UnbindMonitor(SoccerMonitor monitor)
+        private void ActionUnbindMonitor(object arg)
         {
-            monitor.UnbindSimulator(m_simulator);
+            SoccerMonitor monitor = arg as SoccerMonitor;
+            if (monitor != null)
+            {
+                monitor.UnbindFromSimulator(m_simulator);
+            }
         }
 
-        public void Start()
+        private void ActionStart()
         {
             if (m_simulator.Cycle > 0)
                 return;
-
-            m_timer.Enabled = false;
-            m_timer.Tick -= new EventHandler(m_timer_Tick_accepting_connections);
-            m_timer.Interval = this.CycleLength;
-            m_timer.Tick += new EventHandler(m_timer_Tick_play_on);
 
             m_server.StopListeningForNewConnections();
             m_server.SendAllPlayers(String.Format("(cycle {0})", CycleLength));
@@ -217,65 +274,119 @@ namespace GridSoccer.Simulator
             m_simulator.FinishCycle();
 
             System.Threading.Thread.Sleep(CycleLength);
-            m_timer.Enabled = true;
+
         }
 
-        public void Stop()
+        private void ActionStop()
         {
             m_isGameStopped = true;
-            m_timer.Enabled = false;
             m_server.SendAllPlayers("(stop)");
             m_simulator.EndSimulation();
         }
 
-        public void TogglePauseResume()
+        private void ActionTogglePauseResume()
         {
             m_isPaused = !m_isPaused;
-            m_timer.Enabled = !m_isPaused;
+            //m_timer.Enabled = !m_isPaused;
+        }
+
+        private void ActionPause()
+        {
+            m_isPaused = true;
+            GameStep();
+            if (m_simulator.Cycle >= this.GameDuration)
+                ActionStop();
+        }
+
+        private void ActionStep()
+        {
+            m_isPaused = true;
+            GameStep();
+            if (m_simulator.Cycle >= this.GameDuration)
+                ActionStop();
+        }
+
+        private void ActionEnableTurbo()
+        {
+            if (m_simulator.IsGameStarted)
+            {
+                m_preWaitForAll = WaitForAllPlayers;
+                WaitForAllPlayers = true;
+                m_server.SendAllPlayers("(turbo on)");
+                m_turboMode = true;
+            }
+        }
+
+        private void ActionDisableTurbo()
+        {
+            if (m_turboMode)
+            {
+                m_turboMode = false;
+                WaitForAllPlayers = m_preWaitForAll;
+                m_server.SendAllPlayers("(turbo off)");
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void BindMonitor(SoccerMonitor monitor)
+        {
+            EnqueAction(ControllerActionTypes.BindMonitor, monitor);
+        }
+
+        public void UnbindMonitor(SoccerMonitor monitor)
+        {
+            EnqueAction(ControllerActionTypes.UnbindMonitor, monitor);
+        }
+
+        public void Start()
+        {
+            EnqueAction(ControllerActionTypes.Start, null);
+        }
+
+        public void Stop()
+        {
+            EnqueAction(ControllerActionTypes.Stop, null);
+        }
+
+        public void TogglePauseResume()
+        {
+            EnqueAction(ControllerActionTypes.TogglePauseResume, null);
         }
 
         public void RunOneStep()
         {
-            m_timer.Enabled = false;
-            m_isPaused = true;
-            GameStep();
-            if (m_simulator.Cycle >= this.GameDuration)
-                Stop();
+            EnqueAction(ControllerActionTypes.Step, null);
         }
 
         #endregion
 
         #region Private Methods
 
-        private void m_timer_Tick_accepting_connections(object sender, EventArgs e)
+        private void AcceptConnectionStep()
         {
-            m_timer.Enabled = false;
-
             if (m_server.HasConnectionRequest())
                 m_server.AcceptConnection();
 
             m_server.CheckTempClients();
             m_server.CheckConnectedClients();
-
-            m_timer.Enabled = true;
         }
 
-        private void m_timer_Tick_play_on(object sender, EventArgs e)
+        private void PlayOnStep()
         {
-            if (m_isPaused) return;
-            m_timer.Enabled = false;
-            if (m_turboMode) return;
+            if (m_isPaused || m_isGameStopped) 
+                return;
 
             GameStep();
 
             if (m_simulator.Cycle >= this.GameDuration)
             {
-                Stop();
+                ActionStop();
                 if (GameCyclesFinished != null)
                     GameCyclesFinished(this, new EventArgs());
             }
-            else if (!m_isGameStopped)
-                m_timer.Enabled = true;
         }
 
         private void GameStep()
@@ -290,30 +401,6 @@ namespace GridSoccer.Simulator
             m_simulator.FinishUpdateActions();
             m_server.SendSeeMessages();
             m_simulator.FinishCycle();
-        }
-
-        private void EnableTurbo()
-        {
-            System.Threading.Thread.Sleep(1);
-            while (m_turboMode)
-            {
-                GameStep();
-
-                if (m_simulator.Cycle % m_doEventInterval == 0)
-                    Application.DoEvents();
-
-                if (m_simulator.Cycle >= this.GameDuration)
-                {
-                    Stop();
-                    if (GameCyclesFinished != null)
-                        GameCyclesFinished(this, new EventArgs());
-                    break;
-                }
-
-                if (m_isGameStopped)
-                    break;
-            }
-
         }
 
         #endregion
