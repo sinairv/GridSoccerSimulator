@@ -1,4 +1,16 @@
-﻿using System;
+﻿// Copyright (c) 2009 - 2010 
+//  - Sina Iravanian <sina@sinairv.com>
+//  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
+//
+// This source file(s) may be redistributed, altered and customized
+// by any means PROVIDING the authors name and all copyright
+// notices remain intact.
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED. USE IT AT YOUR OWN RISK. THE AUTHOR ACCEPTS NO
+// LIABILITY FOR ANY DATA DAMAGE/LOSS THAT THIS PRODUCT MAY CAUSE.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -19,6 +31,7 @@ namespace GridSoccer.Simulator.Monitor
 
         private bool m_gameStateChanged = false;
         private bool m_gameScoreChanged = true;
+        private object m_eventLock = new object();
 
         public SoccerMonitor()
         {
@@ -55,21 +68,27 @@ namespace GridSoccer.Simulator.Monitor
         {
             //DisableTimer();
 
-            if (m_gameScoreChanged)
+            lock (m_eventLock)
             {
-                ShowScores();
-                m_gameScoreChanged = false;
+                if (m_gameScoreChanged)
+                {
+                    ShowScores();
+                    m_gameScoreChanged = false;
+                }
             }
 
-            if (m_gameStateChanged)
+            lock (m_eventLock)
             {
-                this.Invoke(new Action(() =>
-                    {
-                        lblCycle.Text = m_simulator.Cycle.ToString();
-                        this.soccerField.UpdateField();
-                    }
-                ));
-                m_gameStateChanged = false;
+                if (m_gameStateChanged)
+                {
+                    this.Invoke(new Action(() =>
+                        {
+                            lblCycle.Text = m_simulator.Cycle.ToString();
+                            this.soccerField.UpdateField();
+                        }
+                    ));
+                    m_gameStateChanged = false;
+                }
             }
 
             //if(m_isBound)
@@ -108,12 +127,18 @@ namespace GridSoccer.Simulator.Monitor
 
         void m_simulator_ScoreChanged(object sender, EventArgs e)
         {
-            m_gameScoreChanged = true;
+            lock (m_eventLock)
+            {
+                m_gameScoreChanged = true;
+            }
         }
 
         void m_simulator_Changed(object sender, EventArgs e)
         {
-            m_gameStateChanged = true;
+            lock (m_eventLock)
+            {
+                m_gameStateChanged = true;
+            }
         }
 
         private void ShowScores()
