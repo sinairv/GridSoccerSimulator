@@ -45,6 +45,9 @@ namespace GridSoccer.Simulator.Net
 
         public void AcceptConnection()
         {
+            //TODO
+            Console.WriteLine("A Client Connected...");
+
             TcpClient client = listener.AcceptTcpClient();
             client.NoDelay = true;
 
@@ -90,6 +93,7 @@ namespace GridSoccer.Simulator.Net
                     if (tempClients[i].DataAvailable)
                     {
                         string str = tempClients[i].ReadString();
+
                         IMessageInfo mi = MessageParser.ParseInputMessage(str);
                         if (mi.MessageType == MessageTypes.Init)
                         {

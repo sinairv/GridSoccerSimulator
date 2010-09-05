@@ -31,7 +31,6 @@
             this.pictureBoxTop = new System.Windows.Forms.PictureBox();
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblVersion = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.linkLabel3 = new System.Windows.Forms.LinkLabel();
@@ -74,22 +73,13 @@
             this.lblVersion.TabIndex = 2;
             this.lblVersion.Text = "Alpha";
             // 
-            // label1
-            // 
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(10, 167);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(500, 20);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Copyright (c) 2009-2010 - Sina Iravanian, Sahar Araghi";
-            // 
             // linkLabel1
             // 
             this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(94, 11);
-            this.linkLabel1.Location = new System.Drawing.Point(10, 197);
+            this.linkLabel1.Location = new System.Drawing.Point(10, 168);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(500, 33);
             this.linkLabel1.TabIndex = 5;
@@ -106,7 +96,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabel2.LinkArea = new System.Windows.Forms.LinkArea(0, 17);
-            this.linkLabel2.Location = new System.Drawing.Point(10, 240);
+            this.linkLabel2.Location = new System.Drawing.Point(10, 211);
             this.linkLabel2.Name = "linkLabel2";
             this.linkLabel2.Size = new System.Drawing.Size(500, 33);
             this.linkLabel2.TabIndex = 6;
@@ -121,7 +111,7 @@
             // 
             this.linkLabel3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabel3.LinkArea = new System.Windows.Forms.LinkArea(13, 22);
-            this.linkLabel3.Location = new System.Drawing.Point(10, 281);
+            this.linkLabel3.Location = new System.Drawing.Point(10, 252);
             this.linkLabel3.Name = "linkLabel3";
             this.linkLabel3.Size = new System.Drawing.Size(500, 20);
             this.linkLabel3.TabIndex = 7;
@@ -135,7 +125,7 @@
             // 
             this.linkLabel4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabel4.LinkArea = new System.Windows.Forms.LinkArea(31, 19);
-            this.linkLabel4.Location = new System.Drawing.Point(10, 310);
+            this.linkLabel4.Location = new System.Drawing.Point(10, 281);
             this.linkLabel4.Name = "linkLabel4";
             this.linkLabel4.Size = new System.Drawing.Size(500, 20);
             this.linkLabel4.TabIndex = 8;
@@ -147,8 +137,9 @@
             // 
             // btnOK
             // 
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnOK.Location = new System.Drawing.Point(442, 337);
+            this.btnOK.Location = new System.Drawing.Point(442, 304);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 6;
@@ -161,11 +152,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnOK;
-            this.ClientSize = new System.Drawing.Size(520, 367);
+            this.ClientSize = new System.Drawing.Size(520, 331);
             this.Controls.Add(this.linkLabel4);
             this.Controls.Add(this.linkLabel3);
             this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.linkLabel2);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.lblVersion);
@@ -193,7 +183,6 @@
         private System.Windows.Forms.PictureBox pictureBoxTop;
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Label lblVersion;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.LinkLabel linkLabel2;
         private System.Windows.Forms.LinkLabel linkLabel3;

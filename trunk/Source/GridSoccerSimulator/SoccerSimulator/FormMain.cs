@@ -19,6 +19,9 @@ namespace GridSoccer.Simulator
         {
             InitializeComponent();
 
+            // TODO before development
+            tbtnSettings.Visible = false;
+
             // Init Image Icons
             tbtnBindMonitor.Visible = false;
             tbtnNormalSpeed.Visible = false;

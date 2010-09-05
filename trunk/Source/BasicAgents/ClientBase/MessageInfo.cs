@@ -87,7 +87,4 @@ namespace GridSoccer.ClientBasic
 
         public bool TurboOn;
     }
-
-
-
 }

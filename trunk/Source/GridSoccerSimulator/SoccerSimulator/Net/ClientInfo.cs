@@ -44,7 +44,12 @@ namespace GridSoccer.Simulator.Net
 
         public string ReadString()
         {
-            return br.ReadString();
+            string rcvd = br.ReadString();
+        
+            // TODO
+            //Console.WriteLine("Received: " + rcvd);
+
+            return rcvd;
         }
 
         public void WriteString(string str)
@@ -52,6 +57,10 @@ namespace GridSoccer.Simulator.Net
             try
             {
                 bw.Write(str);
+
+                // TODO
+                //Console.WriteLine("Send: " + str);
+
                 //bw.Flush();
             }
             catch
