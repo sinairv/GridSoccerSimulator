@@ -61,14 +61,14 @@ namespace GridSoccer.Simulator.Monitor
 
         private void SoccerField_Paint(object sender, PaintEventArgs e)
         {
-            // TODO: look for a thread-safe method to render current game-status.
-            // e.g., some Simulator.GetCurSnapShot() which returns all the positions, and data
-            // about the players and is implemented with appropriate locks in the simulator itself
-
             Graphics g = e.Graphics;
 
             if (m_fieldBitmap == null)
                 m_fieldBitmap = CreateFieldBitmap();
+
+            if (m_sideLen <= 0)
+                return;
+
             if(m_leftPlayerBitmap == null)
                 m_leftPlayerBitmap = CreateLeftPlayerBitmap();
             if(m_rightPlayerBitmap == null)
@@ -148,6 +148,9 @@ namespace GridSoccer.Simulator.Monitor
                 (Width - 2 * internalPadding) / nCols, 
                 (Height - 2 * internalPadding) / nRows);
 
+            if (m_sideLen <= 0)
+                return bmp;
+
             // draw background
             g.FillRectangle(Brushes.White, 0, 0, this.Width, this.Height);
 
@@ -218,6 +221,10 @@ namespace GridSoccer.Simulator.Monitor
             if (m_fieldBitmap == null || m_fieldBitmap.Width != this.Width || m_fieldBitmap.Height != this.Height)
             {
                 m_fieldBitmap = CreateFieldBitmap();
+
+                if (m_sideLen <= 0)
+                    return;
+
                 m_rightPlayerBitmap = CreateRightPlayerBitmap();
                 m_leftPlayerBitmap = CreateLeftPlayerBitmap();
                 m_ballBitmap = CreateBallBitmap();
