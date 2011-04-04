@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -11,9 +11,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GridSoccer.Common;
 
 namespace GridSoccer.Simulator.Net
@@ -58,6 +55,33 @@ namespace GridSoccer.Simulator.Net
                         return IMessageInfo.GetIllegalMessage();
                     else
                         return new HomeMessage() { R = r, C = c };
+                }
+                else if (msg == "episode-timeout")
+                {
+                    string stat = ParserUtils.GetTokenAt(toks, 1);
+                    EpisodeTimeoutMessage eptMsg = new EpisodeTimeoutMessage();
+                    switch (stat)
+                    {
+                        case "opp-pass":
+                            eptMsg.IsOur = false;
+                            eptMsg.IsPass = true;
+                            break;
+                        case "opp-fail":
+                            eptMsg.IsOur = false;
+                            eptMsg.IsPass = false;
+                            break;
+                        case "our-pass":
+                            eptMsg.IsOur = true;
+                            eptMsg.IsPass = true;
+                            break;
+                        case "our-fail":
+                        default:
+                            eptMsg.IsOur = true;
+                            eptMsg.IsPass = false;
+                            break;
+                    }
+
+                    return eptMsg;
                 }
                 else if (msg == "hold")
                 {

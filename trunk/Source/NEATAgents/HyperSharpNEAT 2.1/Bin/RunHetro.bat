@@ -1,0 +1,1 @@
+SkirmishCmdEvolution.exe -seed Seeds\seedGenomeModulusBlank.xml -folder HetroSubTri02 -shape triangle -multi true

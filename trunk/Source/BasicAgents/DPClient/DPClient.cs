@@ -34,7 +34,7 @@ namespace GridSoccer.DPClient
         private ValueTableInitModes m_initMode = ValueTableInitModes.Constant;
         private double m_initValue = 0.0;
         
-        private const double Theta = 0.001;
+        private const double Theta = 0.0001;
         private const double Gamma = 0.9;
 
 

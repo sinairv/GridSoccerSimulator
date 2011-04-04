@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -9,11 +9,6 @@
 // EXPRESS OR IMPLIED. USE IT AT YOUR OWN RISK. THE AUTHOR ACCEPTS NO
 // LIABILITY FOR ANY DATA DAMAGE/LOSS THAT THIS PRODUCT MAY CAUSE.
 //-----------------------------------------------------------------------
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GridSoccer.RLAgentsCommon
 {

@@ -27,7 +27,7 @@ namespace RLClient
             return new QTable(this.EnvRows, this.EnvCols, TeammatesCount, MyUnum);
         }
 
-        protected override string PerformanceLoggerMethodName
+        public override string PerformanceLoggerMethodName
         {
             get { return "ReplacingTrace"; }
         }

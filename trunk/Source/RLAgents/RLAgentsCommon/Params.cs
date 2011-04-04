@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -22,6 +22,7 @@ namespace GridSoccer.RLAgentsCommon
         #region enums
         public enum RLMethods
         {
+            Evolutionary,
             Q_Zero, SARSA_Zero, SARSA_Lambda, Q_Lambda_Watkins, Q_Lambda_Naive /*, Q_Lambda_Peng*/ 
         }
 
@@ -55,18 +56,18 @@ namespace GridSoccer.RLAgentsCommon
         public static double RewardHold = -1;
         public static double RewardIllegalMovment = -3;
 
-        public static double RewardTeamCatchBall = 20;
-        public static double RewardTeamLooseBall = -20;
+        public static double RewardTeamCatchBall = 10;
+        public static double RewardTeamLooseBall = -10;
 
-        public static double RewardSelfCatchBall = 20;
-        public static double RewardSelfLooseBall = -20;
+        public static double RewardSelfCatchBall = 10;
+        public static double RewardSelfLooseBall = -10;
 
-        public static double RewardTeamScoreGoal = 20;
-        public static double RewardSelfScoreGoal = 20;
-        public static double RewardTeamRecvGoal = -20;
+        public static double RewardTeamScoreGoal = 10;
+        public static double RewardSelfScoreGoal = 10;
+        public static double RewardTeamRecvGoal = -10;
 
-        public static double RewardTeamOwnGoal = -50;
-        public static double RewardSelfOwnGoal = -100;
+        public static double RewardTeamOwnGoal = -15;
+        public static double RewardSelfOwnGoal = -20;
         public static double RewardOpponentOwnGoal = 1;
 
         public static string GetParamsString()
@@ -124,3 +125,4 @@ namespace GridSoccer.RLAgentsCommon
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -11,11 +11,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Net.Sockets;
-using System.IO;
+using System.Threading;
 
 namespace GridSoccer.Simulator.Net
 {
@@ -24,25 +22,18 @@ namespace GridSoccer.Simulator.Net
     /// </summary>
     public class ClientInfo
     {
-        private TcpClient client;
-        private BinaryReader br;
-        private BinaryWriter bw;
+        private TcpClient m_client;
 
         public TcpClient TcpClient 
         { 
             get
             {
-                return client;
+                return m_client;
             }
 
             set
             {
-                client = value;
-                if (client != null)
-                {
-                    br = new BinaryReader(client.GetStream());
-                    bw = new BinaryWriter(client.GetStream());
-                }
+                m_client = value;
             }
         }
 
@@ -50,17 +41,17 @@ namespace GridSoccer.Simulator.Net
         {
             get
             {
-                return client.GetStream().DataAvailable;
+                return m_client.GetStream().DataAvailable;
             }
         }
 
         public string ReadString()
         {
-            string rcvd = br.ReadString();
-        
-            // TODO
-            //Console.WriteLine("Received: " + rcvd);
-
+            var readBuffer = new byte[1024];
+            m_client.GetStream().Read(readBuffer, 0, readBuffer.Length);
+            string rcvd = Encoding.ASCII.GetString(readBuffer);
+            rcvd = rcvd.Trim('\0');
+            //Console.WriteLine("RCVD: " + rcvd);
             return rcvd;
         }
 
@@ -68,12 +59,11 @@ namespace GridSoccer.Simulator.Net
         {
             try
             {
-                bw.Write(str);
-
-                // TODO
-                //Console.WriteLine("Send: " + str);
-
-                //bw.Flush();
+                byte[] bs = Encoding.ASCII.GetBytes(str);
+                m_client.GetStream().Write(bs, 0, bs.Length);
+                //m_client.GetStream().Flush();
+                //Thread.Sleep(0);
+                //Console.WriteLine("Sent: " + str);
             }
             catch
             {
@@ -82,9 +72,7 @@ namespace GridSoccer.Simulator.Net
 
         public void Close()
         {
-            client.Close();
-            br.Close();
-            bw.Close();
+            m_client.Close();
         }
 
         public int PlayerIndex;

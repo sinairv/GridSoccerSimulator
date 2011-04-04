@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -27,7 +27,7 @@ namespace GridSoccer.Simulator
         }
 
         [Category("Game Settings")]
-        [Description("The length of each time cycle in milli-seconds.")]
+        [Description("The totoal number of time cycles in a game.")]
         [DisplayName("Game Duration")]
         public long GameDuration 
         {
@@ -59,7 +59,7 @@ namespace GridSoccer.Simulator
         }
 
         [Category("Game Settings")]
-        [Description("The totoal number of time cycles in a game.")]
+        [Description("The length of each time cycle in milli-seconds.")]
         [DisplayName("Cycle Length")]
         public int CycleLength
         {

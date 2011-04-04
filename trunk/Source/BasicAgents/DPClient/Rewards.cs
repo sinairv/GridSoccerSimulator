@@ -7,14 +7,14 @@ namespace GridSoccer.DPClient
 {
     public static class Rewards
     {
-        public static double ScoreGoal = 2.0;
-        public static double ReceiveGoal = 0.0;
+        public static double ScoreGoal = 1.0;
+        public static double ReceiveGoal = -1.0;
 
-        public static double CatchBall = 2.0;
-        public static double LooseBall = 0.0;
+        public static double CatchBall = 0.01;
+        public static double LooseBall = -0.01;
 
-        public static double Movement = 0.0;
-        public static double InvalidMove = 0.0;
+        public static double Movement = -0.01;
+        public static double InvalidMove = -0.01;
 
         //public static double ScoreGoal = 2.0;
         //public static double ReceiveGoal = -2.0;

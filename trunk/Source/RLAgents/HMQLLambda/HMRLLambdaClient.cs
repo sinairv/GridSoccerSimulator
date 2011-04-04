@@ -47,7 +47,7 @@ namespace GridSoccer.HMQLLambda
             get { return 2; }
         }
 
-        protected override string PerformanceLoggerMethodName
+        public override string PerformanceLoggerMethodName
         {
             get 
             {

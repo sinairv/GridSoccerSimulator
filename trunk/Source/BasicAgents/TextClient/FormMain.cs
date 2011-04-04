@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Net.Sockets;
-using System.Net;
 using System.IO;
+using System.Text;
 
 namespace GridSoccer.TextClient
 {
@@ -43,8 +38,11 @@ namespace GridSoccer.TextClient
             {
                 if (tcpSocket.GetStream().DataAvailable)
                 {
-                    BinaryReader br = new BinaryReader(tcpSocket.GetStream());
-                    Console.WriteLine("R: {0}", br.ReadString());
+                    var buffer = new byte[1024];
+                    tcpSocket.GetStream().Read(buffer, 0, buffer.Length);
+                    string rcvd = Encoding.ASCII.GetString(buffer);
+                    rcvd = rcvd.Trim('\0');
+                    Console.WriteLine("R: {0}", rcvd);
                 }
             }
 
@@ -61,8 +59,9 @@ namespace GridSoccer.TextClient
 
         private void SendData()
         {
-            BinaryWriter bw = new BinaryWriter(tcpSocket.GetStream());
-            bw.Write(txtInput.Text);
+            string msg = txtInput.Text;
+            var buff = Encoding.ASCII.GetBytes(msg);
+            tcpSocket.GetStream().Write(buff, 0, buff.Length);
             txtInput.Text = "";
         }
     }

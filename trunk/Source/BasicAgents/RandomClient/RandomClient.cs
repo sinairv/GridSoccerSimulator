@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using GridSoccer.ClientBasic;
 using GridSoccer.Common;
 
@@ -9,6 +7,9 @@ namespace GridSoccer.RandomClient
 {
     public class RandomClient : ClientBase
     {
+        private readonly bool MoveKings = false;
+        private static Random rnd = new Random();
+
         public RandomClient(string serverAddr, int serverPort, string teamname, int unum)
             : base(serverAddr, serverPort, teamname, unum)
         {
@@ -20,23 +21,28 @@ namespace GridSoccer.RandomClient
                 SetHomePosition(3, 3);
         }
 
-        private static Random rnd = new Random();
         protected override SoccerAction Think()
         {
-            int dst = -1;
-            ActionTypes at = ActionTypes.Hold;
+            int[] teammates = this.GetAvailableTeammatesUnums().ToArray();
+            int numActions = SoccerAction.GetActionCount(this.MoveKings, teammates.Length + 1);
+            int ai = rnd.Next(0, numActions);
+            return SoccerAction.GetActionFromIndex(ai, this.MoveKings, this.MyUnum);
 
-            at = (ActionTypes)rnd.Next(0, 10);
-            if (at == ActionTypes.Pass)
-            {
-                int[] teammates = this.GetAvailableTeammatesUnums().ToArray();
-                if (teammates.Length <= 0)
-                    at = ActionTypes.Hold;
-                else
-                    dst = teammates[rnd.Next(0, teammates.Length)];
-            }
+            //int dst = -1;
+            //ActionTypes at = ActionTypes.Hold;
 
-            return new SoccerAction(at, dst);
+
+            //SoccerAction.GetActionTypeFromIndex(ai);
+            //at = (ActionTypes)
+            //if (at == ActionTypes.Pass)
+            //{
+            //    if (teammates.Length <= 0)
+            //        at = ActionTypes.Hold;
+            //    else
+            //        dst = teammates[rnd.Next(0, teammates.Length)];
+            //}
+
+            //return new SoccerAction(at, dst);
         }
     }
 }

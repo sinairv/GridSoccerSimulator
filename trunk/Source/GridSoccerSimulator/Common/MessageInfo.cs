@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -10,13 +10,11 @@
 // LIABILITY FOR ANY DATA DAMAGE/LOSS THAT THIS PRODUCT MAY CAUSE.
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace GridSoccer.Common
 {
     public enum MessageTypes
     {
-        Illegal, Init, Move, Pass, Hold, Home,
+        Illegal, Init, Move, Pass, Hold, Home, EpisodeTimeout,
         Settings, InitOK, InitError, Error, See, Start, Stop, Cycle, Turbo
     }
 

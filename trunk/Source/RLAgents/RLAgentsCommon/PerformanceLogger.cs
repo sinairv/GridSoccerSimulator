@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -26,12 +26,17 @@ namespace GridSoccer.RLAgentsCommon
         public bool Enabled { get; set; }
 
         public PerformanceLogger(string fileNameBase)
+            : this(fileNameBase, true)
+        {
+        }
+
+        public PerformanceLogger(string fileNameBase, bool printHeading)
         {
             Enabled = true;
-            m_fileName = fileNameBase + String.Format("-{0:yyyy}{0:MM}{0:dd}-{0:hh}{0:mm}{0:ss}.log", DateTime.Now);
+            m_fileName = fileNameBase + String.Format("-{0:yyyy}{0:MM}{0:dd}-{0:HH}{0:mm}{0:ss}.log", DateTime.Now);
             try
             {
-                m_sWriter = File.CreateText(m_fileName);
+                m_sWriter = new StreamWriter(new FileStream(m_fileName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite));
                 m_sWriter.AutoFlush = true;
             }
             catch
@@ -39,7 +44,8 @@ namespace GridSoccer.RLAgentsCommon
                 Enabled = false;
             }
 
-            PrintHeading();
+            if(printHeading)
+                PrintHeading();
         }
 
         private void PrintHeading()
@@ -76,8 +82,18 @@ namespace GridSoccer.RLAgentsCommon
         {
             if (m_sWriter != null)
             {
-                m_sWriter.Flush();
-                m_sWriter.Close();
+                try
+                {
+                    m_sWriter.Flush();
+                    m_sWriter.Close();
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    m_sWriter = null;
+                }
             }
         }
     }

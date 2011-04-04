@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -12,24 +12,25 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net.Sockets;
-using System.IO;
+using System.Text;
 using GridSoccer.Common;
 using System.Threading;
+using System.Diagnostics;
+using System.IO;
 
 namespace GridSoccer.ClientBasic
 {
     public abstract class ClientBase
     {
-        private TcpClient socket = null;
-        private BinaryWriter binWriter = null;
-        private BinaryReader binReader = null;
+        private readonly TcpClient m_socket;
 
         protected int m_myIndex = -1;
-        private int m_goalUpperRow = -1;
-        private int m_goalLowerRow = -1;
+        protected readonly int m_goalUpperRow = -1;
+        protected readonly int m_goalLowerRow = -1;
+
+        public int MyHomePosRow { get; private set; }
+        public int MyHomePosCol { get; private set; }
 
         public Sides MySide { get; private set; }
         public string MyTeamName { get; private set; }
@@ -42,8 +43,8 @@ namespace GridSoccer.ClientBasic
         public int LastSeeBall { get; private set; }
         public Position BallPosition { get; private set; }
         public bool IsGameStarted { get; private set; }
-        private int CycleLength { get; set; }
-        private bool TurboMode { get; set; }
+        protected int CycleLength { get; set; }
+        protected bool TurboMode { get; set; }
 
         public int[] LastSeePlayers { get; private set; }
         public Position[] PlayerPositions { get; private set; }
@@ -57,24 +58,22 @@ namespace GridSoccer.ClientBasic
         public int EnvMinPlayers { get; private set; }
         public int EnvMaxPlayers { get; private set; }
 
-        public ClientBase(string serverAddr, int serverPort, string teamname, int unum)
+        protected ClientBase(string serverAddr, int serverPort, string teamname, int unum)
         {
             if (String.IsNullOrEmpty(teamname))
                 throw new Exception("Invalid team name", null);
 
-            socket = new TcpClient(serverAddr, serverPort);
-            socket.NoDelay = true;
-            binWriter = new BinaryWriter(socket.GetStream());
-            binReader = new BinaryReader(socket.GetStream());
+            m_socket = new TcpClient(serverAddr, serverPort) {NoDelay = true};
 
             Send(String.Format("(init {0} {1})", teamname, unum));
 
             string msg = Read();
             IMessageInfo mi = ServerMessageParser.ParseInputMessage(msg);
             if (mi.MessageType != MessageTypes.InitOK)
-                throw new Exception("expected init-ok but received " + mi.MessageType.ToString());
+                throw new Exception("expected init-ok but received " + mi.MessageType);
 
-            InitOKMessage okmi =  mi as InitOKMessage;
+            var okmi =  mi as InitOKMessage;
+            Debug.Assert(okmi != null);
             this.MySide = okmi.Side;
             this.MyTeamName = teamname;
             this.MyUnum = unum;
@@ -82,8 +81,8 @@ namespace GridSoccer.ClientBasic
             msg = Read();
             mi = ServerMessageParser.ParseInputMessage(msg);
             if (mi.MessageType != MessageTypes.Settings)
-                throw new Exception("expected settings but received " + mi.MessageType.ToString());
-            ParseSettings((mi as SettingsMessage).SettingsMsgTokens);
+                throw new Exception("expected settings but received " + mi.MessageType);
+            ParseSettings(((SettingsMessage) mi).SettingsMsgTokens);
             
             BallPosition = new Position();
             LastSeePlayers = new int[2 * EnvMaxPlayers];
@@ -104,9 +103,9 @@ namespace GridSoccer.ClientBasic
         #region Communication Stuff
         private void ParseSettings(string[] tokens)
         {
-            int value;
             for (int i = 1; i < tokens.Length; i+=2)
             {
+                int value;
                 if (Int32.TryParse(tokens[i + 1], out value))
                 {
                     switch (tokens[i])
@@ -205,21 +204,30 @@ namespace GridSoccer.ClientBasic
         {
             try
             {
-                binWriter.Write(msg);
+                byte[] bs = Encoding.ASCII.GetBytes(msg);
+                m_socket.GetStream().Write(bs, 0, bs.Length);
+                //m_socket.GetStream().Flush();
+                //Console.WriteLine("sending: " + msg);
             }
-            catch
+            catch (Exception)
             {
+                Debug.WriteLine("Error in sending message: " + msg);
             }
         }
 
         private string Read()
         {
-            return binReader.ReadString();
+            var readBuffer = new byte[1024];
+            m_socket.GetStream().Read(readBuffer, 0, readBuffer.Length);
+            string rcvd = Encoding.ASCII.GetString(readBuffer);
+            rcvd = rcvd.Trim('\0');
+            //Console.WriteLine("rcvd: " + rcvd);
+            return rcvd;
         }
 
         private bool DataAvailable()
         {
-            return socket.GetStream().DataAvailable;
+            return m_socket.GetStream().DataAvailable;
         }
 
         private void SendAction(ActionTypes acType)
@@ -262,6 +270,9 @@ namespace GridSoccer.ClientBasic
 
         private void SendAction(SoccerAction act)
         {
+            if (act == null)
+                return;
+
             if (act.ActionType != ActionTypes.Pass)
                 SendAction(act.ActionType);
             else
@@ -270,8 +281,8 @@ namespace GridSoccer.ClientBasic
 
         private bool UpdateFromServer()
         {
-            if (DataAvailable())
-            {
+            //if (DataAvailable())
+            //{
                 string msg = Read();
                 IMessageInfo imi = ServerMessageParser.ParseInputMessage(msg);
                 switch (imi.MessageType)
@@ -280,22 +291,22 @@ namespace GridSoccer.ClientBasic
                         Console.WriteLine("Error: " + msg);
                         return false;
                     case MessageTypes.See:
-                        ParseSeeMessage((imi as SeeMessage).SeeMsgTokens);
+                        ParseSeeMessage(((SeeMessage) imi).SeeMsgTokens);
                         return true;
                     case MessageTypes.Start:
                         IsGameStarted = true;
                         return false;
                     case MessageTypes.Stop:
-                        gameIsNotStoped = false;
+                        m_gameIsNotStoped = false;
                         return false;
                     case MessageTypes.Cycle:
-                        CycleLength = (imi as CycleMessage).CycleLength;
+                        CycleLength = ((CycleMessage) imi).CycleLength;
                         return false;
                     case MessageTypes.Turbo:
-                        TurboMode = (imi as TurboMessage).TurboOn;
+                        TurboMode = ((TurboMessage) imi).TurboOn;
                         return false;
                 }
-            }
+            //}
             return false;
         }
 
@@ -306,22 +317,53 @@ namespace GridSoccer.ClientBasic
 
         protected void SetHomePosition(int r, int c)
         {
+            this.MyHomePosRow = r;
+            this.MyHomePosCol = c;
+
             Send(String.Format("(home {0} {1})", r, c));
+        }
+
+        protected void EpisodeTimeoutOurFail()
+        {
+            Send("(episode-timeout our-fail)");
+        }
+
+        protected void EpisodeTimeoutOurPass()
+        {
+            Send("(episode-timeout our-pass)");
+        }
+
+        protected void EpisodeTimeoutOppFail()
+        {
+            Send("(episode-timeout opp-fail)");
+        }
+
+        protected void EpisodeTimeoutOppPass()
+        {
+            Send("(episode-timeout opp-pass)");
         }
 
         #endregion
 
         protected abstract SoccerAction Think();
 
-        private bool gameIsNotStoped = true;
-        public void Start()
+        private bool m_gameIsNotStoped = true;
+        public virtual void Start()
         {
-            while (gameIsNotStoped)
+            while (m_gameIsNotStoped)
             {
-                if(UpdateFromServer())
-                    ThinkBase();
-                //if(!TurboMode)
-                Thread.Sleep(1);
+                try
+                {
+                    if (UpdateFromServer())
+                        ThinkBase();
+                    //if(!TurboMode)
+                    //Thread.Sleep(1);
+                }
+                catch (IOException)
+                {
+                    Console.WriteLine("The server has terminated unexpectedly. Trying to terminate.");
+                    m_gameIsNotStoped = false;
+                }
             }
             OnGameStopped();
         }

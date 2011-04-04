@@ -19,8 +19,27 @@ namespace RLClient1P
         protected override void SetGlobalParams()
         {
             Params.MoveKings = false;
-            Params.RLMethod = Params.RLMethods.Q_Zero;
+            Params.RLMethod = Params.RLMethods.Q_Lambda_Watkins;
             Params.IsStateUniformNeutral = false;
+
+            Params.RewardEveryMovment = -0.01;
+            Params.RewardSuccessfulPass = -0.01;
+            Params.RewardHold = -0.01;
+            Params.RewardIllegalMovment = -0.01;
+
+            Params.RewardTeamCatchBall = 0.01;
+            Params.RewardTeamLooseBall = -0.02;
+
+            Params.RewardSelfCatchBall = 0.02;
+            Params.RewardSelfLooseBall = -0.02;
+
+            Params.RewardTeamScoreGoal = 5;
+            Params.RewardSelfScoreGoal = 5;
+            Params.RewardTeamRecvGoal = -5;
+
+            Params.RewardTeamOwnGoal = -5;
+            Params.RewardSelfOwnGoal = -5;
+            Params.RewardOpponentOwnGoal = 1;
         }
 
         protected override QTableBase InstantiateQTable()
@@ -33,7 +52,7 @@ namespace RLClient1P
             get { return 1; }
         }
 
-        protected override string PerformanceLoggerMethodName
+        public override string PerformanceLoggerMethodName
         {
             get { return "RL1P"; }
         }

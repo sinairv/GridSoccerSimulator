@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CF41C2DE-2096-44F8-B4CD-A6FFDE4E8A9A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GridSoccer.HyperNEATControllerAgent</RootNamespace>
+    <AssemblyName>HyperNEATControllerAgent</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\Bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\Bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Clients.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BallOwnerAwareSubstrate.cs" />
+    <Compile Include="Basics\NeatExpParams.cs" />
+    <Compile Include="Basics\NeatPlayerPerformanceStats.cs" />
+    <Compile Include="Basics\NeatQTableBase.cs" />
+    <Compile Include="CCEA3LayersFieldSubs\FieldSubs3LExperiment.cs" />
+    <Compile Include="CCEA3LayersFieldSubs\FieldSubs3LNetworkEvaluator.cs" />
+    <Compile Include="CCEA3LayersFieldSubs\FieldSubs3LQTable.cs" />
+    <Compile Include="CCEA3LayersFieldSubs\MultiLayerSandwichSubstrate.cs" />
+    <Compile Include="CCEAGeomCtrl\CCEAGeomCtrlExperiment.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CCEAGeomCtrl\CCEAGeomCtrlNetworkEvaluator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CCEAGeomCtrl\CCEAGeomCtrlQTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CCEAGeomCtrl\GeomPlayerSubstrate.cs" />
+    <Compile Include="ExperimentTypes.cs" />
+    <Compile Include="FourDFieldSubs\FourDFieldSubsExperiment.cs" />
+    <Compile Include="FourDFieldSubs\FourDFieldSubsNetworkEvaluator.cs" />
+    <Compile Include="FourDFieldSubs\FourDFieldSubsQTable.cs" />
+    <Compile Include="FourDFieldSubs\FourDFieldSubstrate.cs" />
+    <Compile Include="HyperNEATClient.cs" />
+    <Compile Include="CCEAFieldSubs\HyperNEATPlayerNetworkEvaluator.cs" />
+    <Compile Include="CCEAFieldSubs\HyperNEATPlayerExperiment.cs" />
+    <Compile Include="CCEAFieldSubs\HyperNEATQTable.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Clients.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BasicAgents\ClientBase\ClientBase.csproj">
+      <Project>{9719298C-7F9B-4611-8AB5-668904D29CE1}</Project>
+      <Name>ClientBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GridSoccerSimulator\Common\Common.csproj">
+      <Project>{E2F59C55-04EF-43D7-AC6B-72650BBF99D2}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RLAgents\RLAgentsCommon\RLAgentsCommon.csproj">
+      <Project>{DA6808F6-1395-4AA3-B59E-26ED211AADD0}</Project>
+      <Name>RLAgentsCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HyperSharpNEAT 2.1\SharpNeatLib\SharpNeatLib.csproj">
+      <Project>{3A64602B-C5E0-4CB7-99B0-1FC6ABB4449A}</Project>
+      <Name>SharpNeatLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

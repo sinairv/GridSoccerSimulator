@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -43,7 +43,7 @@ namespace GridSoccer.Simulator
 
         private SoccerSimulator m_simulator;
         private Server m_server;
-        private SoccerMonitor m_mainMonitor = null;
+        private readonly SoccerMonitor m_mainMonitor = null;
         //private Timer m_timer;
 
         private bool m_isGameStopped = false;
@@ -256,7 +256,7 @@ namespace GridSoccer.Simulator
 
         private void ActionBindMonitor(object arg)
         {
-            SoccerMonitor monitor = arg as SoccerMonitor;
+            var monitor = arg as SoccerMonitor;
             if (monitor != null)
             {
                 monitor.IntervalUpdateUI = this.CycleLength;
@@ -266,7 +266,7 @@ namespace GridSoccer.Simulator
 
         private void ActionUnbindMonitor(object arg)
         {
-            SoccerMonitor monitor = arg as SoccerMonitor;
+            var monitor = arg as SoccerMonitor;
             if (monitor != null)
             {
                 monitor.UnbindFromSimulator(m_simulator);
@@ -285,7 +285,7 @@ namespace GridSoccer.Simulator
             m_server.SendSeeMessages();
             m_simulator.FinishCycle();
 
-            System.Threading.Thread.Sleep(CycleLength);
+            Thread.Sleep(CycleLength);
 
         }
 
@@ -302,13 +302,13 @@ namespace GridSoccer.Simulator
             //m_timer.Enabled = !m_isPaused;
         }
 
-        private void ActionPause()
-        {
-            m_isPaused = true;
-            GameStep();
-            if (m_simulator.Cycle >= this.GameDuration)
-                ActionStop();
-        }
+        //private void ActionPause()
+        //{
+        //    m_isPaused = true;
+        //    GameStep();
+        //    if (m_simulator.Cycle >= this.GameDuration)
+        //        ActionStop();
+        //}
 
         private void ActionStep()
         {
@@ -346,6 +346,10 @@ namespace GridSoccer.Simulator
         public void BindMonitor(SoccerMonitor monitor)
         {
             EnqueAction(ControllerActionTypes.BindMonitor, monitor);
+            if (this.IsGameStopped)
+            {
+                monitor.ForceUpdateMonitor();
+            }
         }
 
         public void UnbindMonitor(SoccerMonitor monitor)
@@ -360,6 +364,8 @@ namespace GridSoccer.Simulator
 
         public void Stop()
         {
+            // this is a mandatory call which forcefully sets a flag which prevents other threads from remaining alive
+            m_simulator.EndSimulation();
             EnqueAction(ControllerActionTypes.Stop, null);
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -25,7 +25,12 @@ namespace GridSoccer.Common
             m_args = new string[args.Length];
 
             for (int i = 0; i < args.Length; i++)
-                m_args[i] = args[i].ToLower().Trim();
+            {
+                m_args[i] = args[i].Trim();
+
+                if (m_args[i].StartsWith("-"))
+                    m_args[i] = m_args[i].ToLower();
+            }
         }
 
         /// <summary>
@@ -46,7 +51,12 @@ namespace GridSoccer.Common
         public bool IsArgumentProvided(string arg, out string param)
         {
             int i = Find(arg);
-            if (i + 1 < m_args.Length)
+            if (i < 0)
+            {
+                param = "";
+                return false;
+            }
+            else if (i + 1 < m_args.Length)
             {
                 param = m_args[i + 1];
                 return (!param.StartsWith("-"));

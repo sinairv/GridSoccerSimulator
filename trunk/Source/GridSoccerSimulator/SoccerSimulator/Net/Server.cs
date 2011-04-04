@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -12,14 +12,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using GridSoccer.Simulator.Properties;
-using System.IO;
 using GridSoccer.Common;
-using System.Threading;
 
 namespace GridSoccer.Simulator.Net
 {
@@ -27,11 +24,11 @@ namespace GridSoccer.Simulator.Net
     {
         #region Fields
 
-        TcpListener listener = null;
-        List<ClientInfo> tempClients = new List<ClientInfo>();
-        ClientInfo[] ConnectedClients;
+        readonly TcpListener m_listener = null;
+        readonly List<ClientInfo> m_tempClients = new List<ClientInfo>();
+        readonly ClientInfo[] m_connectedClients;
 
-        SoccerSimulator simulator = null;
+        readonly SoccerSimulator m_simulator = null;
 
         #endregion
 
@@ -39,11 +36,11 @@ namespace GridSoccer.Simulator.Net
 
         public Server(SoccerSimulator sim, int port)
         {
-            this.simulator = sim;
-            ConnectedClients = new ClientInfo[Settings.Default.MaxPlayers * 2];
+            this.m_simulator = sim;
+            m_connectedClients = new ClientInfo[Settings.Default.MaxPlayers * 2];
 
-            listener = new TcpListener(IPAddress.Parse("127.0.0.1"), Settings.Default.PortNumber);
-            listener.Start();
+            m_listener = new TcpListener(IPAddress.Parse("127.0.0.1"), Settings.Default.PortNumber);
+            m_listener.Start();
         }
 
         #endregion
@@ -52,7 +49,7 @@ namespace GridSoccer.Simulator.Net
 
         public bool HasConnectionRequest()
         {
-            return listener.Pending();
+            return m_listener.Pending();
         }
 
         public void AcceptConnection()
@@ -60,20 +57,20 @@ namespace GridSoccer.Simulator.Net
             //TODO
             Console.WriteLine("A Client Connected...");
 
-            TcpClient client = listener.AcceptTcpClient();
+            TcpClient client = m_listener.AcceptTcpClient();
             client.NoDelay = true;
 
-            tempClients.Add(new ClientInfo() { PlayerIndex = -1, TcpClient = client });
+            m_tempClients.Add(new ClientInfo() { PlayerIndex = -1, TcpClient = client });
         }
 
         public void StopListeningForNewConnections()
         {
-            listener.Stop();
+            m_listener.Stop();
         }
 
-        private string GetSettingsMessage()
+        private static string GetSettingsMessage()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             sb.AppendFormat(" ({0} {1})", "rows", Settings.Default.NumRows);
             sb.AppendFormat(" ({0} {1})", "cols", Settings.Default.NumCols);
@@ -83,47 +80,47 @@ namespace GridSoccer.Simulator.Net
             sb.AppendFormat(" ({0} {1})", "min-players", Settings.Default.MinPlayers);
             sb.AppendFormat(" ({0} {1})", "max-players", Settings.Default.MaxPlayers);
 
-            return String.Format("(settings{0})", sb.ToString());
+            return String.Format("(settings{0})", sb);
         }
 
         public void FreeTempClients()
         {
-            for (int i = tempClients.Count - 1; i >= 0; --i)
+            for (int i = m_tempClients.Count - 1; i >= 0; --i)
             {
-                tempClients[i].Close();
+                m_tempClients[i].Close();
             }
 
-            tempClients.Clear();
+            m_tempClients.Clear();
         }
 
         public void CheckTempClients()
         {
-            for (int i = tempClients.Count - 1; i >= 0; --i)
+            for (int i = m_tempClients.Count - 1; i >= 0; --i)
             {
                 try
                 {
-                    if (tempClients[i].DataAvailable)
+                    if (m_tempClients[i].DataAvailable)
                     {
-                        string str = tempClients[i].ReadString();
+                        string str = m_tempClients[i].ReadString();
 
                         IMessageInfo mi = MessageParser.ParseInputMessage(str);
                         if (mi.MessageType == MessageTypes.Init)
                         {
-                            InitMessage initmsg = mi as InitMessage;
-                            int pi = simulator.AddPlayer(initmsg.TeamName, initmsg.UNum);
+                            var initmsg = mi as InitMessage;
+                            int pi = m_simulator.AddPlayer(initmsg.TeamName, initmsg.UNum);
                             if (pi >= 0)
                             {
-                                tempClients[i].WriteString(String.Format("(init {0} ok)", initmsg.TeamName == simulator.LeftTeamName ? "l" : "r"));
-                                tempClients[i].WriteString(GetSettingsMessage());
-                                ConnectedClients[pi] = tempClients[i];
+                                m_tempClients[i].WriteString(String.Format("(init {0} ok)", initmsg.TeamName == m_simulator.LeftTeamName ? "l" : "r"));
+                                m_tempClients[i].WriteString(GetSettingsMessage());
+                                m_connectedClients[pi] = m_tempClients[i];
                             }
                             else
                             {
-                                tempClients[i].WriteString("(init error)");
-                                tempClients[i].Close();
+                                m_tempClients[i].WriteString("(init error)");
+                                m_tempClients[i].Close();
                             }
 
-                            tempClients.RemoveAt(i);
+                            m_tempClients.RemoveAt(i);
                         }
                     }
                 }
@@ -135,16 +132,16 @@ namespace GridSoccer.Simulator.Net
 
         public void SendAllPlayers(string msg)
         {
-            int count = simulator.LeftPlayersCount + simulator.RightPlayersCount;
+            int count = m_simulator.LeftPlayersCount + m_simulator.RightPlayersCount;
             for (int i = 0; i < count; ++i)
             {
-                ConnectedClients[i].WriteString(msg);
+                m_connectedClients[i].WriteString(msg);
             }
         }
 
         public void CheckConnectedClientsWaitingForAll()
         {
-            int count = simulator.LeftPlayersCount + simulator.RightPlayersCount;
+            int count = m_simulator.LeftPlayersCount + m_simulator.RightPlayersCount;
 
             bool[] recv = new bool[count];
 
@@ -152,39 +149,44 @@ namespace GridSoccer.Simulator.Net
             {
                 try
                 {
-                    while (!recv[i])
+                    while (!recv[i] && !m_simulator.IsGameStopped)
                     {
-                        if (ConnectedClients[i].DataAvailable)
+                        if (m_connectedClients[i].DataAvailable)
                         {
                             recv[i] = true;
 
-                            string str = ConnectedClients[i].ReadString();
+                            string str = m_connectedClients[i].ReadString();
                             IMessageInfo mi = MessageParser.ParseInputMessage(str);
                             if (mi.MessageType == MessageTypes.Hold)
                             {
-                                SoccerAction act = new SoccerAction(ActionTypes.Hold, -1);
-                                simulator.UpdateActionForPlayer(i, act);
+                                var act = new SoccerAction(ActionTypes.Hold, -1);
+                                m_simulator.UpdateActionForPlayer(i, act);
                             }
                             else if (mi.MessageType == MessageTypes.Move)
                             {
-                                MoveMessage movmsg = mi as MoveMessage;
-                                SoccerAction act = new SoccerAction(movmsg.ActionType, -1);
-                                simulator.UpdateActionForPlayer(i, act);
+                                var movmsg = mi as MoveMessage;
+                                var act = new SoccerAction(movmsg.ActionType, -1);
+                                m_simulator.UpdateActionForPlayer(i, act);
                             }
                             else if (mi.MessageType == MessageTypes.Pass)
                             {
-                                PassMessage pmsg = mi as PassMessage;
-                                simulator.UpdateActionForPlayer(i, new SoccerAction(ActionTypes.Pass, pmsg.DstUnum));
+                                var pmsg = mi as PassMessage;
+                                m_simulator.UpdateActionForPlayer(i, new SoccerAction(ActionTypes.Pass, pmsg.DstUnum));
                             }
                             else if (mi.MessageType == MessageTypes.Home)
                             {
-                                HomeMessage hmsg = mi as HomeMessage;
-                                if(!simulator.SetHomePos(i, hmsg.R, hmsg.C))
-                                    ConnectedClients[i].WriteString("(error could-not-set-home)");
+                                var hmsg = mi as HomeMessage;
+                                if(!m_simulator.SetHomePos(i, hmsg.R, hmsg.C))
+                                    m_connectedClients[i].WriteString("(error could-not-set-home)");
+                            }
+                            else if (mi.MessageType == MessageTypes.EpisodeTimeout)
+                            {
+                                var etmsg = mi as EpisodeTimeoutMessage;
+                                m_simulator.EpisodeTimeout(i, etmsg.IsOur, etmsg.IsPass);
                             }
                             else
                             {
-                                ConnectedClients[i].WriteString("(error)");
+                                m_connectedClients[i].WriteString("(error)");
                             }
                         }
                     }
@@ -197,41 +199,46 @@ namespace GridSoccer.Simulator.Net
 
         public void CheckConnectedClients()
         {
-            int count = simulator.LeftPlayersCount + simulator.RightPlayersCount;
+            int count = m_simulator.LeftPlayersCount + m_simulator.RightPlayersCount;
 
             for (int i = 0; i < count; ++i)
             {
                 try
                 {
-                    if (ConnectedClients[i].DataAvailable)
+                    if (m_connectedClients[i].DataAvailable)
                     {
-                        string str = ConnectedClients[i].ReadString();
+                        string str = m_connectedClients[i].ReadString();
                         IMessageInfo mi = MessageParser.ParseInputMessage(str);
                         if (mi.MessageType == MessageTypes.Hold)
                         {
-                            SoccerAction act = new SoccerAction(ActionTypes.Hold, -1);
-                            simulator.UpdateActionForPlayer(i, act);
+                            var act = new SoccerAction(ActionTypes.Hold, -1);
+                            m_simulator.UpdateActionForPlayer(i, act);
                         }
                         else if (mi.MessageType == MessageTypes.Move)
                         {
-                            MoveMessage movmsg = mi as MoveMessage;
-                            SoccerAction act = new SoccerAction(movmsg.ActionType, -1);
-                            simulator.UpdateActionForPlayer(i, act);
+                            var movmsg = mi as MoveMessage;
+                            var act = new SoccerAction(movmsg.ActionType, -1);
+                            m_simulator.UpdateActionForPlayer(i, act);
                         }
                         else if (mi.MessageType == MessageTypes.Pass)
                         {
-                            PassMessage pmsg = mi as PassMessage;
-                            simulator.UpdateActionForPlayer(i, new SoccerAction(ActionTypes.Pass, pmsg.DstUnum));
+                            var pmsg = mi as PassMessage;
+                            m_simulator.UpdateActionForPlayer(i, new SoccerAction(ActionTypes.Pass, pmsg.DstUnum));
                         }
                         else if (mi.MessageType == MessageTypes.Home)
                         {
-                            HomeMessage hmsg = mi as HomeMessage;
-                            if (!simulator.SetHomePos(i, hmsg.R, hmsg.C))
-                                ConnectedClients[i].WriteString("(error could-not-set-home)");
+                            var hmsg = mi as HomeMessage;
+                            if (!m_simulator.SetHomePos(i, hmsg.R, hmsg.C))
+                                m_connectedClients[i].WriteString("(error could-not-set-home)");
+                        }
+                        else if (mi.MessageType == MessageTypes.EpisodeTimeout)
+                        {
+                            var etmsg = mi as EpisodeTimeoutMessage;
+                            m_simulator.EpisodeTimeout(i, etmsg.IsOur, etmsg.IsPass);
                         }
                         else
                         {
-                            ConnectedClients[i].WriteString("(error)");
+                            m_connectedClients[i].WriteString("(error)");
                         }
                     }
                 }
@@ -243,19 +250,18 @@ namespace GridSoccer.Simulator.Net
 
         public void SendSeeMessages()
         {
-            simulator.FormSeeLists();
-            int count = simulator.LeftPlayersCount + simulator.RightPlayersCount;
+            m_simulator.FormSeeLists();
+            int count = m_simulator.LeftPlayersCount + m_simulator.RightPlayersCount;
 
-            List<int> visiblePlayers;
             PlayerInfo curPlayer;
 
             for (int i = 0; i < count; ++i)
             {
-                visiblePlayers = simulator.GetSeeListForPlayer(i);
-                curPlayer = simulator.Players[i];
+                List<int> visiblePlayers = m_simulator.GetSeeListForPlayer(i);
+                curPlayer = m_simulator.Players[i];
 
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("(see {0} (score {1} {2})", simulator.Cycle, simulator.LeftScore, simulator.RightScore);
+                var sb = new StringBuilder();
+                sb.AppendFormat("(see {0} (score {1} {2})", m_simulator.Cycle, m_simulator.LeftScore, m_simulator.RightScore);
 
                 if (curPlayer.Side == Sides.Left)
                 {
@@ -265,11 +271,11 @@ namespace GridSoccer.Simulator.Net
                     {
                         if (p < 0)
                         {
-                            sb.AppendFormat(" (b {0})", simulator.BallPosition.ToString());
+                            sb.AppendFormat(" (b {0})", m_simulator.BallPosition.ToString());
                         }
                         else
                         {
-                            PlayerInfo thePlayer = simulator.Players[p];
+                            PlayerInfo thePlayer = m_simulator.Players[p];
                             sb.AppendFormat(" ({0} {1} {2})", 
                                 thePlayer.Side == Sides.Left ? "l" : "r", 
                                 thePlayer.PlayerNumber, 
@@ -285,11 +291,11 @@ namespace GridSoccer.Simulator.Net
                     {
                         if (p < 0)
                         {
-                            sb.AppendFormat(" (b {0})", simulator.BallPosition.GetRTL().ToString());
+                            sb.AppendFormat(" (b {0})", m_simulator.BallPosition.GetRTL().ToString());
                         }
                         else
                         {
-                            PlayerInfo thePlayer = simulator.Players[p];
+                            PlayerInfo thePlayer = m_simulator.Players[p];
                             sb.AppendFormat(" ({0} {1} {2})",
                                 thePlayer.Side == Sides.Left ? "l" : "r",
                                 thePlayer.PlayerNumber,
@@ -300,7 +306,7 @@ namespace GridSoccer.Simulator.Net
 
                 sb.Append(")");
 
-                ConnectedClients[i].WriteString(sb.ToString());
+                m_connectedClients[i].WriteString(sb.ToString());
             }
         }
 

@@ -30,7 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ValueTableVisualizer));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.meshPlotter1 = new Plot3D.MeshPlotter();
+            this.meshPlotter1 = new PlottingTools.MeshPlotter();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.txtOppRow = new System.Windows.Forms.ToolStripTextBox();
@@ -160,6 +160,6 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
         private System.Windows.Forms.ToolStripTextBox txtOppCol;
         private System.Windows.Forms.ToolStripButton tbtnBOwner;
-        private Plot3D.MeshPlotter meshPlotter1;
+        private PlottingTools.MeshPlotter meshPlotter1;
     }
 }

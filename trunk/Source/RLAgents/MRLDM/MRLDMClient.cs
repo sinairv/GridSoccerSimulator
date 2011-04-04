@@ -41,7 +41,7 @@ namespace MRLDM
         }
 
         string m_performanceLoggerMethodName = "";
-        protected override string PerformanceLoggerMethodName
+        public override string PerformanceLoggerMethodName
         {
             get { return m_performanceLoggerMethodName; }
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GridSoccer.RLAgentsCommon;
 
 namespace RLClient1P
 {
@@ -14,6 +15,9 @@ namespace RLClient1P
                 client = new RLClient1P(args[0], Int32.Parse(args[1]));
             else
                 client = new RLClient1P("RL1P", 1);
+
+            if (args.Length >= 3 && args[2] == "-rnd")
+                Params.Epsillon = 1.0;
 
             client.Start();
         }

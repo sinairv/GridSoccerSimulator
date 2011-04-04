@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -11,13 +11,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
 using System.Threading;
 
 namespace GridSoccer.Simulator.Monitor
@@ -38,7 +32,7 @@ namespace GridSoccer.Simulator.Monitor
             InitializeComponent();
 
             m_timerUpdateUI = new System.Threading.Timer(TimerUpdateUICallBack, null,
-                System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+                Timeout.Infinite, Timeout.Infinite);
         }
 
         public int IntervalUpdateUI
@@ -56,7 +50,7 @@ namespace GridSoccer.Simulator.Monitor
 
         private void DisableTimer()
         {
-            m_timerUpdateUI.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+            m_timerUpdateUI.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         private void EnableTimer()
@@ -81,12 +75,17 @@ namespace GridSoccer.Simulator.Monitor
             {
                 if (m_gameStateChanged)
                 {
-                    this.Invoke(new Action(() =>
-                        {
-                            lblCycle.Text = m_simulator.Cycle.ToString();
-                            this.soccerField.UpdateField();
-                        }
-                    ));
+                    var act = new Action(() =>
+                            {
+                                lblCycle.Text = m_simulator.Cycle.ToString();
+                                this.soccerField.UpdateField();
+                            }
+                        );
+                    if (this.InvokeRequired)
+                        this.Invoke(act);
+                    else
+                        act.Invoke();
+
                     m_gameStateChanged = false;
                 }
             }
@@ -97,32 +96,51 @@ namespace GridSoccer.Simulator.Monitor
 
         public void BindToSimulator(SoccerSimulator sim)
         {
-            this.Invoke(new Action(() =>
-                {
-                    m_simulator = sim;
-                    this.soccerField.SetSimulator(sim);
-                    m_simulator.Changed += new EventHandler(m_simulator_Changed);
-                    m_simulator.ScoreChanged += new EventHandler(m_simulator_ScoreChanged);
-                    m_isBound = true;
-                    //this.soccerField.BindToSimulator(sim);
-                    m_simulator_ScoreChanged(this, new EventArgs());
-                    EnableTimer();
-                }
-            ));
+            var act = new Action(() =>
+                                     {
+                                         m_simulator = sim;
+                                         this.soccerField.SetSimulator(sim);
+                                         m_simulator.Changed += new EventHandler(m_simulator_Changed);
+                                         m_simulator.ScoreChanged += new EventHandler(m_simulator_ScoreChanged);
+                                         m_isBound = true;
+
+                                         //this.soccerField.BindToSimulator(sim);
+                                         //m_simulator_ScoreChanged(this, new EventArgs());
+
+                                         ForceUpdateMonitor();
+                                         EnableTimer();
+                                     }
+                );
+
+            if(this.InvokeRequired)
+                this.Invoke(act);
+            else
+                act.Invoke();
+        }
+
+        public void ForceUpdateMonitor()
+        {
+            m_gameStateChanged = true;
+            m_gameScoreChanged = true;
+            TimerUpdateUICallBack(null);
         }
 
         public void UnbindFromSimulator(SoccerSimulator sim)
         {
-            this.Invoke(new Action(() =>
-                {
-                    m_isBound = false;
-                    DisableTimer();
-                    this.soccerField.SetSimulator(null);
-                    m_simulator.Changed -= new EventHandler(m_simulator_Changed);
-                    m_simulator.ScoreChanged -= new EventHandler(m_simulator_ScoreChanged);
-                }
-            ));
+            var act = new Action(() =>
+                                     {
+                                         m_isBound = false;
+                                         DisableTimer();
+                                         this.soccerField.SetSimulator(null);
+                                         m_simulator.Changed -= new EventHandler(m_simulator_Changed);
+                                         m_simulator.ScoreChanged -= new EventHandler(m_simulator_ScoreChanged);
+                                     }
+                );
 
+            if(this.InvokeRequired)
+                this.Invoke(act);
+            else
+                act.Invoke();
         }
 
         void m_simulator_ScoreChanged(object sender, EventArgs e)
@@ -143,14 +161,22 @@ namespace GridSoccer.Simulator.Monitor
 
         private void ShowScores()
         {
-            this.Invoke(new Action(() =>
-            {
-                if (!String.IsNullOrEmpty(m_simulator.LeftTeamName))
-                    lblLeftTeamName.Text = String.Format("{1} - {0}", m_simulator.LeftScore, m_simulator.LeftTeamName);
-                if (!String.IsNullOrEmpty(m_simulator.RightTeamName))
-                    lblRightTeamName.Text = String.Format("{1} - {0}", m_simulator.RightTeamName, m_simulator.RightScore);
-            }
-            ));
+            var act = new Action(() =>
+                                     {
+                                         if (!String.IsNullOrEmpty(m_simulator.LeftTeamName))
+                                             lblLeftTeamName.Text = String.Format("{1} - {0}", m_simulator.LeftScore,
+                                                                                  m_simulator.LeftTeamName);
+                                         if (!String.IsNullOrEmpty(m_simulator.RightTeamName))
+                                             lblRightTeamName.Text = String.Format("{1} - {0}",
+                                                                                   m_simulator.RightTeamName,
+                                                                                   m_simulator.RightScore);
+                                     }
+                );
+
+            if(this.InvokeRequired)
+                this.Invoke(act);
+            else
+                act.Invoke();
         }
 
         private void SoccerMonitor_Resize(object sender, EventArgs e)

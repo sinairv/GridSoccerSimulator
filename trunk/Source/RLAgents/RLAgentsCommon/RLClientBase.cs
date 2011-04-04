@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -27,7 +27,8 @@ namespace GridSoccer.RLAgentsCommon
         protected PerformanceLogger m_performanceLogger;
         protected QTableBase m_qTable;
 
-        private Mutex m_mutexQTable = new Mutex();
+
+        private object m_lockQTable = new object();
 
         protected State m_curState = null;
         protected State m_prevState = null;
@@ -38,15 +39,22 @@ namespace GridSoccer.RLAgentsCommon
         {
             // the order of these statements are toooo important
             SetGlobalParams();
-            m_qTable = InstantiateQTable();
-            m_performanceLogger = new PerformanceLogger(String.Format("Logs/{0}-{4}-{3}-{2}-{1}",
-                teamname, unum,
-                Params.IsStateUniformNeutral ? "UniformNeutral" : "UniformBased",
-                Params.RLMethod.ToString(),
-                PerformanceLoggerMethodName
+
+            m_performanceLogger = new PerformanceLogger(String.Format("Logs/{0}-{1}-{2}",
+                teamname,
+                //Params.IsStateUniformNeutral ? "UniformNeutral" : "UniformBased",
+                //Params.RLMethod.ToString(),
+                PerformanceLoggerMethodName, unum
                 ));
 
             LogSimulatorSettings();
+        }
+
+        public override void Start()
+        {
+            m_qTable = InstantiateQTable();
+
+            base.Start();
         }
 
         private void LogSimulatorSettings()
@@ -69,18 +77,28 @@ namespace GridSoccer.RLAgentsCommon
 
         protected abstract QTableBase InstantiateQTable();
 
+        public QTableBase QTable
+        {
+            get
+            {
+                return m_qTable;
+            }
+        }
+
         public void SaveQTable(TextWriter tw)
         {
-            m_mutexQTable.WaitOne();
-            m_qTable.Save(tw);
-            m_mutexQTable.ReleaseMutex();
+            lock (m_lockQTable)
+            {
+                m_qTable.Save(tw);
+            }
         }
 
         public void LoadQTable(TextReader tr)
         {
-            m_mutexQTable.WaitOne();
-            m_qTable.Load(tr);
-            m_mutexQTable.ReleaseMutex();
+            lock (m_lockQTable)
+            {
+                m_qTable.Load(tr);
+            }
         }
 
         /// <summary>
@@ -89,7 +107,7 @@ namespace GridSoccer.RLAgentsCommon
         /// <value>The teammates count.</value>
         protected abstract int TeammatesCount { get; }
 
-        protected abstract string PerformanceLoggerMethodName { get; }
+        public abstract string PerformanceLoggerMethodName { get; }
 
         /// <summary>
         /// updates the current state varialbe (i.e., m_curState) with the 
@@ -127,26 +145,28 @@ namespace GridSoccer.RLAgentsCommon
         /// <returns></returns>
         protected override SoccerAction Think()
         {
-            m_mutexQTable.WaitOne();
-            m_prevState = m_curState;
-            m_curState = GetCurrentState();
-            m_qTable.SetCurrentState(m_curState);
-
             int actIndex;
-            try
+            lock (m_lockQTable)
             {
-                actIndex = RLThink();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("-------------");
-                Console.WriteLine(ex.ToString());
-                throw;
-                //act = new SoccerAction(ActionTypes.Hold);
+                m_prevState = m_curState;
+                m_curState = GetCurrentState();
+                m_qTable.SetCurrentState(m_curState);
+
+                try
+                {
+                    actIndex = RLThink();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("-------------");
+                    Console.WriteLine(ex.ToString());
+                    throw;
+                    //act = new SoccerAction(ActionTypes.Hold);
+                }
+
+                m_prevActionIndex = actIndex;
             }
 
-            m_prevActionIndex = actIndex;
-            m_mutexQTable.ReleaseMutex();
             return SoccerAction.GetActionFromIndex(actIndex, Params.MoveKings, this.MyUnum);
         }
 
@@ -154,13 +174,27 @@ namespace GridSoccer.RLAgentsCommon
         {
             int greedyActIndex = m_qTable.GetCurrentGreedyActionIndex();
 
-            int actIndex = ChooseActionEpsilonGreedy(Params.Epsillon, SoccerAction.GetActionCount(Params.MoveKings, TeammatesCount), greedyActIndex);
+            int actIndex = greedyActIndex;
+            if (Params.Epsillon > 0.0)
+            {
+                actIndex = ChooseActionEpsilonGreedy(
+                    Params.Epsillon,
+                    SoccerAction.GetActionCount(Params.MoveKings, TeammatesCount),
+                    greedyActIndex);
+            }
             //SoccerAction act = SoccerAction.GetActionFromIndex(actIndex, Params.MoveKings, MyUnum);
+
 
             if (Cycle > 0) // because in cycle 0 there is no prev state
             {
+                double reward = EnvironmentModeler.GetReward(m_prevState, m_curState,
+                    SoccerAction.GetActionTypeFromIndex(m_prevActionIndex, Params.MoveKings));
+
                 switch (Params.RLMethod)
                 {
+                    case Params.RLMethods.Evolutionary:
+                        m_qTable.UpdateQ_Evolutionary(m_prevActionIndex, reward);
+                        break;
                     case Params.RLMethods.Q_Zero:
                         m_qTable.UpdateQ_QLearning(m_prevActionIndex);
                         break;
@@ -182,8 +216,6 @@ namespace GridSoccer.RLAgentsCommon
 
                 if (m_performanceLogger.Enabled)
                 {
-                    double reward = EnvironmentModeler.GetReward(m_prevState, m_curState,
-                        SoccerAction.GetActionTypeFromIndex(m_prevActionIndex, Params.MoveKings));
                     m_performanceLogger.Log(Cycle, reward, OurScore, OppScore);
                 }
 

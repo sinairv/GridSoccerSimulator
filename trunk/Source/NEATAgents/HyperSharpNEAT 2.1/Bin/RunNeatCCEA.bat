@@ -1,0 +1,1 @@
+SkirmishCmdEvolution.exe -neat -folder NEATCCEALogsTri04 -shape triangle

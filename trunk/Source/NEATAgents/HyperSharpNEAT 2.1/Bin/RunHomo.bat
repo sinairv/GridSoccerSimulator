@@ -1,0 +1,1 @@
+SkirmishCmdEvolution.exe -folder Logs -shape diamond -multi false

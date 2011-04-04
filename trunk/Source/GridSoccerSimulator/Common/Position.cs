@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -51,6 +51,13 @@ namespace GridSoccer.Common
         {
             int r = pos1.Row + pos2.Row;
             int c = pos1.Col + pos2.Col;
+            return new Position(r, c);
+        }
+
+        public static Position operator -(Position pos1, Position pos2)
+        {
+            int r = pos1.Row - pos2.Row;
+            int c = pos1.Col - pos2.Col;
             return new Position(r, c);
         }
 

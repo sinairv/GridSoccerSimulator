@@ -1,0 +1,1 @@
+SkirmishCmdEvolution.exe -ccea -folder CCEALogsDia10 -shape diamond

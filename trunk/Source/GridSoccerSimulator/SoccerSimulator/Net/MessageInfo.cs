@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009 - 2010 
+// Copyright (c) 2009 - 2011 
 //  - Sina Iravanian <sina@sinairv.com>
 //  - Sahar Araghi   <sahar_araghi@aut.ac.ir>
 //
@@ -38,6 +38,17 @@ namespace GridSoccer.Simulator.Net
 
         public int R;
         public int C;
+    }
+
+    public class EpisodeTimeoutMessage : IMessageInfo
+    {
+        public EpisodeTimeoutMessage()
+        {
+            MessageType = MessageTypes.EpisodeTimeout;
+        }
+
+        public bool IsOur;
+        public bool IsPass;
     }
 
     public class HoldMessage : IMessageInfo
