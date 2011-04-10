@@ -23,6 +23,7 @@ namespace GridSoccer.ClientBasic
 {
     public abstract class ClientBase
     {
+        private Queue<string> m_qReadMessages = new Queue<string>();
         private readonly TcpClient m_socket;
 
         protected int m_myIndex = -1;
@@ -204,10 +205,8 @@ namespace GridSoccer.ClientBasic
         {
             try
             {
-                byte[] bs = Encoding.ASCII.GetBytes(msg);
+                byte[] bs = Encoding.ASCII.GetBytes(msg + '\0');
                 m_socket.GetStream().Write(bs, 0, bs.Length);
-                //m_socket.GetStream().Flush();
-                //Console.WriteLine("sending: " + msg);
             }
             catch (Exception)
             {
@@ -217,17 +216,29 @@ namespace GridSoccer.ClientBasic
 
         private string Read()
         {
-            var readBuffer = new byte[1024];
-            m_socket.GetStream().Read(readBuffer, 0, readBuffer.Length);
-            string rcvd = Encoding.ASCII.GetString(readBuffer);
-            rcvd = rcvd.Trim('\0');
-            //Console.WriteLine("rcvd: " + rcvd);
-            return rcvd;
+            if (m_qReadMessages.Count > 0)
+            {
+                return m_qReadMessages.Dequeue();
+            }
+            else
+            {
+                var readBuffer = new byte[1024];
+                m_socket.GetStream().Read(readBuffer, 0, readBuffer.Length);
+                string rcvd = Encoding.ASCII.GetString(readBuffer);
+
+                string[] msgs = rcvd.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string str in msgs)
+                    m_qReadMessages.Enqueue(str);
+
+                string curmsg = m_qReadMessages.Dequeue();
+                return curmsg;
+            }
         }
 
         private bool DataAvailable()
         {
-            return m_socket.GetStream().DataAvailable;
+            return m_qReadMessages.Count > 0 || m_socket.GetStream().DataAvailable;
         }
 
         private void SendAction(ActionTypes acType)

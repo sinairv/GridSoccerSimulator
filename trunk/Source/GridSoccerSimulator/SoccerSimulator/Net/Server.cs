@@ -54,7 +54,6 @@ namespace GridSoccer.Simulator.Net
 
         public void AcceptConnection()
         {
-            //TODO
             Console.WriteLine("A Client Connected...");
 
             TcpClient client = m_listener.AcceptTcpClient();

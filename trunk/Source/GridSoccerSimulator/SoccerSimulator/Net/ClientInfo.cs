@@ -14,6 +14,8 @@ using System;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace GridSoccer.Simulator.Net
 {
@@ -23,6 +25,8 @@ namespace GridSoccer.Simulator.Net
     public class ClientInfo
     {
         private TcpClient m_client;
+        private Queue<string> m_qReadMessages = new Queue<string>();
+
 
         public TcpClient TcpClient 
         { 
@@ -41,29 +45,39 @@ namespace GridSoccer.Simulator.Net
         {
             get
             {
-                return m_client.GetStream().DataAvailable;
+                return m_qReadMessages.Count > 0 || m_client.GetStream().DataAvailable;
             }
         }
 
         public string ReadString()
         {
-            var readBuffer = new byte[1024];
-            m_client.GetStream().Read(readBuffer, 0, readBuffer.Length);
-            string rcvd = Encoding.ASCII.GetString(readBuffer);
-            rcvd = rcvd.Trim('\0');
-            //Console.WriteLine("RCVD: " + rcvd);
-            return rcvd;
+            if (m_qReadMessages.Count > 0)
+            {
+                string msg = m_qReadMessages.Dequeue();
+                return msg;
+            }
+            else
+            {
+                var readBuffer = new byte[1024];
+                m_client.GetStream().Read(readBuffer, 0, readBuffer.Length);
+                string rcvd = Encoding.ASCII.GetString(readBuffer);
+
+                string[] msgs = rcvd.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string str in msgs)
+                    m_qReadMessages.Enqueue(str);
+
+                string curmsg = m_qReadMessages.Dequeue();
+                return curmsg;
+            }
         }
 
         public void WriteString(string str)
         {
             try
             {
-                byte[] bs = Encoding.ASCII.GetBytes(str);
+                byte[] bs = Encoding.ASCII.GetBytes(str + '\0');
                 m_client.GetStream().Write(bs, 0, bs.Length);
-                //m_client.GetStream().Flush();
-                //Thread.Sleep(0);
-                //Console.WriteLine("Sent: " + str);
             }
             catch
             {

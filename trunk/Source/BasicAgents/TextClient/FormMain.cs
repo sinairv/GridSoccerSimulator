@@ -41,8 +41,11 @@ namespace GridSoccer.TextClient
                     var buffer = new byte[1024];
                     tcpSocket.GetStream().Read(buffer, 0, buffer.Length);
                     string rcvd = Encoding.ASCII.GetString(buffer);
-                    rcvd = rcvd.Trim('\0');
-                    Console.WriteLine("R: {0}", rcvd);
+                    string[] msgs = rcvd.Split(new char[] {'\0'}, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var msg in msgs) 
+                    {
+	                    Console.WriteLine("R: {0}", msg);
+                    }
                 }
             }
 
@@ -60,7 +63,7 @@ namespace GridSoccer.TextClient
         private void SendData()
         {
             string msg = txtInput.Text;
-            var buff = Encoding.ASCII.GetBytes(msg);
+            var buff = Encoding.ASCII.GetBytes(msg + '\0');
             tcpSocket.GetStream().Write(buff, 0, buff.Length);
             txtInput.Text = "";
         }
