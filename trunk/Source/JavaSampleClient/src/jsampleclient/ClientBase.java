@@ -81,17 +81,17 @@ public abstract class ClientBase
         ParseSettings(((SettingsMessage)mi).SettingsMsgTokens);
         
         BallPosition = new Position();
-        LastSeePlayers = new int[2 * EnvMaxPlayers];
+        LastSeePlayers = new int[2 * getEnvMaxPlayers()];
 
-        PlayerPositions = new Position[2 * EnvMaxPlayers];
-        for (int i = 0; i < PlayerPositions.length; ++i)
+        PlayerPositions = new Position[2 * getEnvMaxPlayers()];
+        for (int i = 0; i < getPlayerPositions().length; ++i)
         {
-            PlayerPositions[i] = new Position();
+            getPlayerPositions()[i] = new Position();
         }
 
-        PlayerAvailabilities = new boolean[2 * EnvMaxPlayers];
+        PlayerAvailabilities = new boolean[2 * getEnvMaxPlayers()];
 
-        m_myIndex = GetPlayerIndex(MySide, MyUnum);
+        m_myIndex = GetPlayerIndex(getMySide(), getMyUnum());
         m_goalUpperRow = CalculateGoalUpperRow();
         m_goalLowerRow = CalculateGoalLowerRow();
     }
@@ -152,7 +152,7 @@ public abstract class ClientBase
             {
                 num1 = Integer.parseInt(toks[i + 1]);
                 num2 = Integer.parseInt(toks[i + 2]);
-                if (MySide == Sides.Left)
+                if (getMySide() == Sides.Left)
                 {
                     this.OurScore = num1;
                     this.OppScore = num2;
@@ -167,16 +167,16 @@ public abstract class ClientBase
             {
                 num1 = Integer.parseInt(toks[i + 1]);
                 num2 = Integer.parseInt(toks[i + 2]);
-                this.PlayerPositions[m_myIndex].Set(num1, num2);
-                this.LastSeePlayers[m_myIndex] = cycle;
-                this.PlayerAvailabilities[m_myIndex] = true;
+                this.getPlayerPositions()[getMyIndex()].Set(num1, num2);
+                this.getLastSeePlayers()[getMyIndex()] = cycle;
+                this.getPlayerAvailabilities()[getMyIndex()] = true;
             }
             else if(toks[i].equals("b"))
             {
                 num1 = Integer.parseInt(toks[i + 1]);
                 num2 = Integer.parseInt(toks[i + 2]);
                 this.LastSeeBall = cycle;
-                this.BallPosition.Set(num1, num2);
+                this.getBallPosition().Set(num1, num2);
             }
             else if(toks[i].equals("l"))
             {
@@ -184,9 +184,9 @@ public abstract class ClientBase
                 num1 = Integer.parseInt(toks[i + 2]);
                 num2 = Integer.parseInt(toks[i + 3]);
                 pi = GetPlayerIndex(Sides.Left, unum);
-                this.PlayerPositions[pi].Set(num1, num2);
-                this.LastSeePlayers[pi] = cycle;
-                this.PlayerAvailabilities[pi] = true;
+                this.getPlayerPositions()[pi].Set(num1, num2);
+                this.getLastSeePlayers()[pi] = cycle;
+                this.getPlayerAvailabilities()[pi] = true;
                 i++;
             }
             else if(toks[i].equals("r"))
@@ -195,9 +195,9 @@ public abstract class ClientBase
                 num1 = Integer.parseInt(toks[i + 2]);
                 num2 = Integer.parseInt(toks[i + 3]);
                 pi = GetPlayerIndex(Sides.Right, unum);
-                this.PlayerPositions[pi].Set(num1, num2);
-                this.LastSeePlayers[pi] = cycle;
-                this.PlayerAvailabilities[pi] = true;
+                this.getPlayerPositions()[pi].Set(num1, num2);
+                this.getLastSeePlayers()[pi] = cycle;
+                this.getPlayerAvailabilities()[pi] = true;
                 i++;
             }
         }
@@ -246,7 +246,7 @@ public abstract class ClientBase
         }
     }
 
-    private void SendAction(ActionTypes acType) throws Exception
+    public void SendAction(ActionTypes acType) throws Exception
     {
         switch (acType)
         {
@@ -284,7 +284,7 @@ public abstract class ClientBase
         }
     }
 
-    private void SendAction(SoccerAction act) throws Exception
+    public void SendAction(SoccerAction act) throws Exception
     {
         if (act.ActionType != ActionTypes.Pass)
             SendAction(act.ActionType);
@@ -292,7 +292,7 @@ public abstract class ClientBase
             Send(String.format("(pass %d)", act.DestinationUnum));
     }
 
-    private boolean UpdateFromServer() throws Exception
+    public boolean UpdateFromServer() throws Exception
     {
         String msg = Read();
         IMessageInfo imi = ServerMessageParser.ParseInputMessage(msg);
@@ -308,7 +308,7 @@ public abstract class ClientBase
                 IsGameStarted = true;
                 return false;
             case Stop:
-                gameIsNotStoped = false;
+                isNotGameStopped = false;
                 return false;
             case Cycle:
                 CycleLength = ((CycleMessage)imi).CycleLength;
@@ -320,22 +320,22 @@ public abstract class ClientBase
         return false;
     }
 
-    protected void SetHomePosition(Position homePos)
+    public void SetHomePosition(Position homePos)
     {
         SetHomePosition(homePos.Row, homePos.Col);
     }
 
-    protected void SetHomePosition(int r, int c)
+    public void SetHomePosition(int r, int c)
     {
         Send(String.format("(home %d %d)", r, c));
     }
 
     protected abstract SoccerAction Think();
 
-    private boolean gameIsNotStoped = true;
+    private boolean isNotGameStopped = true;
     public void Start() throws Exception
     {
-        while (gameIsNotStoped)
+        while (getIsNotGameStopped())
         {
             if(UpdateFromServer())
                 ThinkBase();
@@ -352,92 +352,92 @@ public abstract class ClientBase
 
     private void ThinkBase() throws Exception
     {
-        if(IsGameStarted)
+        if(getIsGameStarted())
             SendAction(Think());
     }
-    
-    protected void EpisodeTimeoutOurFail()
+
+    public void EpisodeTimeoutOurFail()
     {
         Send("(episode-timeout our-fail)");
     }
 
-    protected void EpisodeTimeoutOurPass()
+    public void EpisodeTimeoutOurPass()
     {
         Send("(episode-timeout our-pass)");
     }
 
-    protected void EpisodeTimeoutOppFail()
+    public void EpisodeTimeoutOppFail()
     {
         Send("(episode-timeout opp-fail)");
     }
 
-    protected void EpisodeTimeoutOppPass()
+    public void EpisodeTimeoutOppPass()
     {
         Send("(episode-timeout opp-pass)");
     }
 
 
-    protected ArrayList<Integer> GetAvailableTeammatesUnums()
+    public ArrayList<Integer> GetAvailableTeammatesUnums()
     {
         ArrayList<Integer> rtValue = new ArrayList<Integer>();
         
-        int start = this.MySide == Sides.Left ? 0 : this.EnvMaxPlayers;
-        int end = this.MySide == Sides.Left ? this.EnvMaxPlayers - 1 : 2 * this.EnvMaxPlayers - 1;
+        int start = this.getMySide() == Sides.Left ? 0 : this.getEnvMaxPlayers();
+        int end = this.getMySide() == Sides.Left ? this.getEnvMaxPlayers() - 1 : 2 * this.getEnvMaxPlayers() - 1;
         for (int i = start; i <= end; ++i)
         {
-            if (i != m_myIndex && PlayerAvailabilities[i])
+            if (i != getMyIndex() && getPlayerAvailabilities()[i])
                 rtValue.add(i - start + 1);
         }
         
         return rtValue;
     }
 
-    protected ArrayList<Integer> GetAvailableTeammatesIndeces()
+    public ArrayList<Integer> GetAvailableTeammatesIndeces()
     {
         ArrayList<Integer> rtValue = new ArrayList<Integer>();
         
-        int start = this.MySide == Sides.Left ? 0 : this.EnvMaxPlayers;
-        int end = this.MySide == Sides.Left ? this.EnvMaxPlayers - 1 : 2*this.EnvMaxPlayers - 1;
+        int start = this.getMySide() == Sides.Left ? 0 : this.getEnvMaxPlayers();
+        int end = this.getMySide() == Sides.Left ? this.getEnvMaxPlayers() - 1 : 2* this.getEnvMaxPlayers() - 1;
         for (int i = start; i <= end; ++i)
         {
-            if (i != m_myIndex && PlayerAvailabilities[i])
+            if (i != getMyIndex() && getPlayerAvailabilities()[i])
                 rtValue.add(i);
         }
         
         return rtValue;
     }
 
-    protected ArrayList<Integer> GetAvailableOpponentsIndeces()
+    public ArrayList<Integer> GetAvailableOpponentsIndeces()
     {
         ArrayList<Integer> rtValue = new ArrayList<Integer>();
 
-        int start = this.MySide != Sides.Left ? 0 : this.EnvMaxPlayers;
-        int end = this.MySide != Sides.Left ? this.EnvMaxPlayers - 1 : 2 * this.EnvMaxPlayers - 1;
+        int start = this.getMySide() != Sides.Left ? 0 : this.getEnvMaxPlayers();
+        int end = this.getMySide() != Sides.Left ? this.getEnvMaxPlayers() - 1 : 2 * this.getEnvMaxPlayers() - 1;
         for (int i = start; i <= end; ++i)
         {
-            if (PlayerAvailabilities[i])
+            if (getPlayerAvailabilities()[i])
                 rtValue.add(i);
         }
         
         return rtValue;
     }
 
-    protected ArrayList<Integer> GetAvailableOpponentsUnums()
+    public ArrayList<Integer> GetAvailableOpponentsUnums()
     {
         ArrayList<Integer> rtValue = new ArrayList<Integer>();
 
-        int start = this.MySide != Sides.Left ? 0 : this.EnvMaxPlayers;
-        int end = this.MySide != Sides.Left ? this.EnvMaxPlayers - 1 : 2 * this.EnvMaxPlayers - 1;
+        int start = this.getMySide() != Sides.Left ? 0 : this.getEnvMaxPlayers();
+        int end = this.getMySide() != Sides.Left ? this.getEnvMaxPlayers() - 1 : 2 * this.getEnvMaxPlayers() - 1;
         for (int i = start; i <= end; ++i)
         {
-            if (PlayerAvailabilities[i])
+            if (getPlayerAvailabilities()[i])
                 rtValue.add(i - start + 1);
         }
         
         return rtValue;
     }
 
-    protected int GetPlayerIndex(Sides side, int unum)
+    public int GetPlayerIndex(Sides side, int unum)
     {
         if (side == Sides.Left)
         {
@@ -445,66 +445,158 @@ public abstract class ClientBase
         }
         else
         {
-            return EnvMaxPlayers + unum - 1;
+            return getEnvMaxPlayers() + unum - 1;
         }
     }
 
-    protected int GetPlayerUnumFromIndex(int index)
+    public int GetPlayerUnumFromIndex(int index)
     {
-        if (0 <= index && index < EnvMaxPlayers)
+        if (0 <= index && index < getEnvMaxPlayers())
             return index + 1;
-        else if (index < 2 * EnvMaxPlayers)
-            return index - EnvMaxPlayers + 1;
+        else if (index < 2 * getEnvMaxPlayers())
+            return index - getEnvMaxPlayers() + 1;
         else
             return -1;
     }
 
-    protected Position GetMyPosition()
+    public Position GetMyPosition()
     {
-        return PlayerPositions[m_myIndex];
+        return getPlayerPositions()[getMyIndex()];
     }
 
-    protected boolean AmIBallOwner()
+    public boolean AmIBallOwner()
     {
-        return (BallPosition == PlayerPositions[m_myIndex] && LastSeeBall == this.Cycle) ;
+        return (getBallPosition() == getPlayerPositions()[getMyIndex()] && getLastSeeBall() == this.getCycle()) ;
     }
 
-    protected boolean AreWeBallOwner()
+    public boolean AreWeBallOwner()
     {
         int bi = GetBallOwnerPlayerIndex();
-        int start = this.MySide == Sides.Left ? 0 : this.EnvMaxPlayers;
-        int end = this.MySide == Sides.Left ? this.EnvMaxPlayers - 1 : 2*this.EnvMaxPlayers - 1;
+        int start = this.getMySide() == Sides.Left ? 0 : this.getEnvMaxPlayers();
+        int end = this.getMySide() == Sides.Left ? this.getEnvMaxPlayers() - 1 : 2* this.getEnvMaxPlayers() - 1;
         return (start <= bi && bi <= end);
     }
 
-    protected int GetBallOwnerPlayerIndex()
+    public int GetBallOwnerPlayerIndex()
     {
-        for (int i = 0; i < PlayerAvailabilities.length; ++i)
+        for (int i = 0; i < getPlayerAvailabilities().length; ++i)
         {
-            if (PlayerAvailabilities[i] && BallPosition == PlayerPositions[i] && LastSeePlayers[i] == LastSeeBall)
+            if (getPlayerAvailabilities()[i] && getBallPosition() == getPlayerPositions()[i] && getLastSeePlayers()[i] == getLastSeeBall())
                 return i;
         }
 
         return -1;
     }
 
-    private int CalculateGoalUpperRow()
+    public int CalculateGoalUpperRow()
     {
-        return (EnvRows - EnvGoalWidth) / 2 + 1;
+        return (getEnvRows() - getEnvGoalWidth()) / 2 + 1;
     }
 
-    private int CalculateGoalLowerRow()
+    public int CalculateGoalLowerRow()
     {
-        return CalculateGoalUpperRow() + EnvGoalWidth - 1;
+        return CalculateGoalUpperRow() + getEnvGoalWidth() - 1;
     }
 
-    protected int getGoalUpperRow()
+    public int getGoalUpperRow()
     {
         return m_goalUpperRow;
     }
 
-    protected int getGoalLowerRow()
+    public int getGoalLowerRow()
     {
         return m_goalLowerRow;
+    }
+
+    public Sides getMySide() {
+        return MySide;
+    }
+
+    public String getMyTeamName() {
+        return MyTeamName;
+    }
+
+    public int getMyUnum() {
+        return MyUnum;
+    }
+
+    public int getOurScore() {
+        return OurScore;
+    }
+
+    public int getOppScore() {
+        return OppScore;
+    }
+
+    public int getCycle() {
+        return Cycle;
+    }
+
+    public int getLastSeeBall() {
+        return LastSeeBall;
+    }
+
+    public Position getBallPosition() {
+        return BallPosition;
+    }
+
+    public boolean getIsGameStarted() {
+        return IsGameStarted;
+    }
+
+    public int getCycleLength() {
+        return CycleLength;
+    }
+
+    public boolean isTurboMode() {
+        return TurboMode;
+    }
+
+    public int[] getLastSeePlayers() {
+        return LastSeePlayers;
+    }
+
+    public Position[] getPlayerPositions() {
+        return PlayerPositions;
+    }
+
+    public boolean[] getPlayerAvailabilities() {
+        return PlayerAvailabilities;
+    }
+
+    public int getEnvRows() {
+        return EnvRows;
+    }
+
+    public int getEnvCols() {
+        return EnvCols;
+    }
+
+    public int getEnvPassDistance() {
+        return EnvPassDistance;
+    }
+
+    public int getEnvVisibilityDistance() {
+        return EnvVisibilityDistance;
+    }
+
+    public int getEnvGoalWidth() {
+        return EnvGoalWidth;
+    }
+
+    public int getEnvMinPlayers() {
+        return EnvMinPlayers;
+    }
+
+    public int getEnvMaxPlayers() {
+        return EnvMaxPlayers;
+    }
+
+    public boolean getIsNotGameStopped() {
+        return isNotGameStopped;
+    }
+
+    public int getMyIndex() {
+        return m_myIndex;
     }
 }
