@@ -5,3 +5,5 @@
 *.vshost.exe.manifest
 obj/
 _ReSharper*/
+bin/
+Debug/
