@@ -1,0 +1,1 @@
+start /wait Killer.exe GridSoccerSimulator HetroModuleRL RandomClient RLClient HandCodedTeam2P HandCodedClient ModularQL HandCoded1P HMQLLambda RLwIM MRLDM NeuroRLClient NEATClient1P HyperNEATControllerAgent
