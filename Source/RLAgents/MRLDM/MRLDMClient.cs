@@ -6,6 +6,9 @@ using GridSoccer.RLAgentsCommon;
 
 namespace MRLDM
 {
+    /// <summary>
+    /// Modular Reinforcement Learning with Data Mining (KNN, or K cyclic nearest neighbour)
+    /// </summary>
     public class MRLDMClient : RLClientBase
     {
         private MRLDMQTable m_mrldmTable;

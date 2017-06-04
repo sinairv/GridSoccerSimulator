@@ -8,6 +8,9 @@ using GridSoccer.RLAgentsCommon;
 
 namespace GridSoccer.HetroModuleRL
 {
+    /// <summary>
+    /// Hetro Module Reinforcement Learning
+    /// </summary>
     public class HetroModuleRLClient : RLClientBase
     {
         // another reference to the Q-Table

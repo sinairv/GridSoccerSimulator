@@ -7,6 +7,9 @@ using GridSoccer.Common;
 
 namespace RLwIM
 {
+    /// <summary>
+    /// Reinforcement Learning with Internal Model
+    /// </summary>
     public class RLwIMClient : RLClientBase
     {
         public RLwIMClient(string teamName, int unum)

@@ -8,6 +8,9 @@ using GridSoccer.Common;
 
 namespace GridSoccer.HMQLLambda
 {
+    /// <summary>
+    /// Hetrogenous Modular Reinforcement Learning Lambda Client
+    /// </summary>
     public class HMRLLambdaClient : RLClientBase
     {
         private QTable m_modularqTable;

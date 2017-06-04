@@ -7,6 +7,9 @@ using GridSoccer.RLAgentsCommon;
 
 namespace RLClient1P
 {
+    /// <summary>
+    /// Reinforcement Learning player playing alone (i.e., for a team of 1 player)
+    /// </summary>
     class RLClient1P : RLClientBase
     {
         public RLClient1P(string teamname, int unum )
